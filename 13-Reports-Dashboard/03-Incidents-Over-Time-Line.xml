@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <!-- 
+    Report: Incidents Over Time (Line Chart)
+    Type: Time Series Line Chart
+    Table: Incident
+    Group By: Created On (by day)
+    Time filter enabled: Yes
+  -->
+  <sys_reports action="INSERT_OR_UPDATE">
+    <sys_id>itsm_rpt_inc_time_line</sys_id>
+    <name>Incidents Over Time</name>
+    <title>Incidents Over Time</title>
+    <table>incident</table>
+    <type>line</type>
+    <active>true</active>
+    <time_series>true</time_series>
+    <time_series_field>sys_created_on</time_series_field>
+    <time_series_interval>daily</time_series_interval>
+    <aggregate>COUNT</aggregate>
+    <show_condition>true</show_condition>
+    <order_direction>DESC</order_direction>
+    <order_by>2</order_by>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <description>Line chart showing incident creation trends over time. Helps identify peak periods, seasonal patterns, and overall incident volume trends.</description>
+    <filter_condition>active=true^ORDERBYDESCnumber</filter_condition>
+    <roles/>
+    <time_range_select>true</time_range_select>
+    <time_range>last_30_days</time_range>
+    <chart_type>line</chart_type>
+    <show_data_labels>false</show_data_labels>
+    <show_legend>false</show_legend>
+    <show_grid>true</show_grid>
+    <chart_area_background_color>#f8f9fa</chart_area_background_color>
+    <line_color>#007bff</line_color>
+    <line_width>2</line_width>
+  </sys_reports>
+</unload>

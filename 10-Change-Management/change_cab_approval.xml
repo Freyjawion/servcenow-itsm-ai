@@ -1,0 +1,84 @@
+<?xml version="1.0" string="true">UTF-8"?>
+<unload>
+  <!-- 
+    Notification: CAB Approval Required
+    When: Event 'change.cab_approval.required' is triggered
+    Who: CAB group members
+    How: Email
+  -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_change_cab_approval</sys_id>
+    <name>CAB Approval Required</name>
+    <active>true</active>
+    <table>change_request</table>
+    <event_name>change.cab_approval.required</event_name>
+    <description>Sent when a high priority change requires CAB approval</description>
+    <recipients>
+      <recipient type="group">cab_group</recipient>
+    </recipients>
+    <subject>CAB Approval Required: ${number} (Priority ${priority}) - ${short_description}</subject>
+    <message_html>
+<html>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+  <h2 style="color: #dc3545;">⚠️ CAB Approval Required</h2>
+  
+  <div style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 8px; padding: 15px; margin: 15px 0;">
+    <strong style="color: #721c24;">🔴 Priority ${priority} Change</strong>
+    <span style="color: #721c24;">- This change requires CAB approval before implementation.</span>
+  </div>
+  
+  <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057; width: 130px;">Change #</td>
+        <td style="padding: 8px;"><a href="${URI_REF}">${number}</a></td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Short Description</td>
+        <td style="padding: 8px;">${short_description}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Type</td>
+        <td style="padding: 8px;">${type}</td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Priority</td>
+        <td style="padding: 8px; font-size: 15px;"><strong>${priority}</strong></td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Risk</td>
+        <td style="padding: 8px;">${risk}</td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Assignment Group</td>
+        <td style="padding: 8px;">${assignment_group}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Planned Start</td>
+        <td style="padding: 8px;">${start_date}</td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Planned End</td>
+        <td style="padding: 8px;">${end_date}</td>
+      </tr>
+    </table>
+  </div>
+
+  <p style="background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; white-space: pre-line;">${description}</p>
+  
+  <div style="margin-top: 25px; padding: 15px; background: #f8d7da; border-radius: 6px;">
+    <p style="margin: 0; color: #721c24;">
+      🗳️ <a href="${URI_REF}" style="color: #dc3545;">Click here to review and approve/reject this change</a>
+    </p>
+  </div>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+  <p style="color: #999; font-size: 12px;">
+    This is an automated notification from ServiceNow ITSM Demo - CAB Approval.
+  </p>
+</body>
+</html>
+    </message_html>
+    <weight>150</weight>
+  </sysevent_email_action>
+</unload>

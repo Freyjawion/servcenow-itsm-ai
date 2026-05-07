@@ -1,0 +1,150 @@
+<div id="itsm-incident-creator">
+  <!-- Header -->
+  <div class="itsm-header">
+    <h1>
+      <span class="glyphicon glyphicon-wrench"></span>
+      IT Service Desk
+    </h1>
+    <p>Submit an incident ticket to our support team</p>
+  </div>
+
+  <!-- Success Message (hidden by default) -->
+  <div class="itsm-success" ng-show="c.successMessage" style="display: none;">
+    <div class="alert alert-success" role="alert">
+      <span class="glyphicon glyphicon-ok-sign"></span>
+      <strong>Incident Submitted Successfully!</strong>
+      <p>{{c.successMessage}}</p>
+      <button class="btn btn-primary" ng-click="c.resetForm()">
+        <span class="glyphicon glyphicon-plus"></span> Submit Another Incident
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div class="itsm-error" ng-show="c.errorMessage" style="display: none;">
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign"></span>
+      <strong>Error:</strong> {{c.errorMessage}}
+    </div>
+  </div>
+
+  <!-- Incident Form -->
+  <form name="incidentForm" class="itsm-form" ng-show="!c.successMessage" novalidate>
+    
+    <!-- Caller Information -->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <span class="glyphicon glyphicon-user"></span> Caller Information
+        </h3>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="callerName">Your Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="callerName" 
+                 ng-model="c.data.caller_name" 
+                 placeholder="Enter your full name" 
+                 required 
+                 readonly 
+                 ng-disabled="true">
+          <small class="text-muted">Auto-filled from your profile</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incident Details -->
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <span class="glyphicon glyphicon-file"></span> Incident Details
+        </h3>
+      </div>
+      <div class="panel-body">
+        
+        <!-- Short Description -->
+        <div class="form-group">
+          <label for="shortDescription">Short Description <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="shortDescription" 
+                 ng-model="c.data.short_description" 
+                 placeholder="Brief summary of the issue (e.g., Laptop not turning on)" 
+                 required 
+                 maxlength="160">
+          <small class="text-muted">Max 160 characters</small>
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label for="category">Category <span class="text-danger">*</span></label>
+          <select class="form-control" id="category" 
+                  ng-model="c.data.category" 
+                  ng-change="c.onCategoryChange()" 
+                  required>
+            <option value="" disabled selected>-- Select Category --</option>
+            <option ng-repeat="cat in c.data.categories" value="{{cat}}">{{cat}}</option>
+          </select>
+        </div>
+
+        <!-- Subcategory -->
+        <div class="form-group">
+          <label for="subcategory">Subcategory <span class="text-danger">*</span></label>
+          <select class="form-control" id="subcategory" 
+                  ng-model="c.data.subcategory" 
+                  ng-disabled="!c.data.category" 
+                  required>
+            <option value="" disabled selected>
+              {{c.data.category ? '-- Select Subcategory --' : '-- Select a Category first --'}}
+            </option>
+            <option ng-repeat="sub in c.data.subcategories" value="{{sub}}">{{sub}}</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Description <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="description" 
+                    ng-model="c.data.description" 
+                    rows="6" 
+                    placeholder="Please provide detailed information about the issue, including:
+• What happened?
+• When did it happen?
+• What have you tried so far?
+• Any error messages?" 
+                    required></textarea>
+        </div>
+
+        <!-- Urgency -->
+        <div class="form-group">
+          <label for="urgency">Urgency</label>
+          <select class="form-control" id="urgency" ng-model="c.data.urgency">
+            <option value="3">3 - Low</option>
+            <option value="2" selected>2 - Medium</option>
+            <option value="1">1 - High</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="itsm-actions">
+      <button type="submit" class="btn btn-primary btn-lg" 
+              ng-click="c.submitIncident()" 
+              ng-disabled="c.isSubmitting || incidentForm.$invalid">
+        <span class="glyphicon glyphicon-send"></span> 
+        {{c.isSubmitting ? 'Submitting...' : 'Submit Incident'}}
+      </button>
+      <button type="button" class="btn btn-default btn-lg" ng-click="c.resetForm()">
+        <span class="glyphicon glyphicon-refresh"></span> Reset
+      </button>
+    </div>
+
+  </form>
+
+  <!-- Loading Indicator -->
+  <div class="itsm-loading" ng-show="c.isLoading">
+    <div class="text-center" style="padding: 50px;">
+      <span class="spinner spinner-lg"></span>
+      <p>Loading...</p>
+    </div>
+  </div>
+</div>

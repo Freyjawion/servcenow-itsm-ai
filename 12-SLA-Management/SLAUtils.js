@@ -1,0 +1,554 @@
+/**
+ * SLAUtils
+ * 
+ * Description: Utility class for SLA Management operations.
+ * Manages Response and Resolution SLAs for incidents based on Priority.
+ * 
+ * Response SLAs:
+ *   Critical (1) - 15 minutes
+ *   High (2) - 1 hour
+ *   Medium (3) - 4 hours
+ *   Low (4) - 8 hours
+ * 
+ * Resolution SLAs:
+ *   Critical (1) - 1 hour
+ *   High (2) - 4 hours
+ *   Medium (3) - 24 hours
+ *   Low (4) - 48 hours
+ * 
+ * Notification triggers:
+ *   75% duration - First reminder
+ *   90% duration - Second reminder
+ *   100% duration - Breach notification
+ * 
+ * Usage:
+ *   var sla = new SLAUtils();
+ *   sla.startResponseSla(incidentGr);
+ *   sla.startResolutionSla(incidentGr);
+ *   sla.stopAllSlas(incidentGr);
+ */
+
+var SLAUtils = Class.create();
+SLAUtils.prototype = {
+    initialize: function() {},
+
+    /**
+     * SLA Duration configurations (in seconds)
+     * Response SLA = time to first response/assignment
+     * Resolution SLA = time to resolve the incident
+     */
+    SLA_CONFIG: {
+        response: {
+            1: { name: 'Response SLA - Critical', duration: 900 },        // 15 min
+            2: { name: 'Response SLA - High', duration: 3600 },           // 1 hour
+            3: { name: 'Response SLA - Medium', duration: 14400 },        // 4 hours
+            4: { name: 'Response SLA - Low', duration: 28800 },           // 8 hours
+            5: { name: 'Response SLA - Planning', duration: 57600 }       // 16 hours (fallback)
+        },
+        resolution: {
+            1: { name: 'Resolution SLA - Critical', duration: 3600 },     // 1 hour
+            2: { name: 'Resolution SLA - High', duration: 14400 },        // 4 hours
+            3: { name: 'Resolution SLA - Medium', duration: 86400 },      // 24 hours
+            4: { name: 'Resolution SLA - Low', duration: 172800 },        // 48 hours
+            5: { name: 'Resolution SLA - Planning', duration: 345600 }    // 96 hours (fallback)
+        }
+    },
+
+    /**
+     * Get notification boundaries (percentage of duration elapsed)
+     */
+    NOTIFICATION_PERCENTAGES: [75, 90, 100],
+
+    /**
+     * Get the response SLA duration in seconds for a given priority
+     * @param {number} priority - Priority value 1-5
+     * @returns {number} Duration in seconds
+     */
+    getResponseSlaDuration: function(priority) {
+        var config = this.SLA_CONFIG.response[priority];
+        return config ? config.duration : this.SLA_CONFIG.response[5].duration;
+    },
+
+    /**
+     * Get the resolution SLA duration in seconds for a given priority
+     * @param {number} priority - Priority value 1-5
+     * @returns {number} Duration in seconds
+     */
+    getResolutionSlaDuration: function(priority) {
+        var config = this.SLA_CONFIG.resolution[priority];
+        return config ? config.duration : this.SLA_CONFIG.resolution[5].duration;
+    },
+
+    /**
+     * Get the SLA display label for given type and priority
+     * @param {string} slaType - 'response' or 'resolution'
+     * @param {number} priority - Priority value 1-5
+     * @returns {string} Human-readable SLA description
+     */
+    getSlaLabel: function(slaType, priority) {
+        var config = slaType === 'response' ? this.SLA_CONFIG.response[priority] : this.SLA_CONFIG.resolution[priority];
+        if (!config) return 'Unknown SLA';
+        var durationStr = this.formatDuration(config.duration);
+        return config.name + ' (' + durationStr + ')';
+    },
+
+    /**
+     * Format seconds into human-readable duration
+     * @param {number} seconds
+     * @returns {string}
+     */
+    formatDuration: function(seconds) {
+        if (seconds < 60) return seconds + ' sec';
+        if (seconds < 3600) return Math.floor(seconds / 60) + ' min';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours';
+        return Math.floor(seconds / 86400) + ' days ' + Math.floor((seconds % 86400) / 3600) + ' hours';
+    },
+
+    /**
+     * Start a response SLA for an incident
+     * Creates a task_sla record
+     * @param {GlideRecord} incidentGr - Incident GlideRecord
+     * @returns {Object} {success: boolean, sla_sys_id: string, error: string}
+     */
+    startResponseSla: function(incidentGr) {
+        return this.startSla(incidentGr, 'response');
+    },
+
+    /**
+     * Start a resolution SLA for an incident
+     * Creates a task_sla record
+     * @param {GlideRecord} incidentGr - Incident GlideRecord
+     * @returns {Object} {success: boolean, sla_sys_id: string, error: string}
+     */
+    startResolutionSla: function(incidentGr) {
+        return this.startSla(incidentGr, 'resolution');
+    },
+
+    /**
+     * Start an SLA timer for an incident
+     * @param {GlideRecord} incidentGr - Incident GlideRecord
+     * @param {string} slaType - 'response' or 'resolution'
+     * @returns {Object} {success: boolean, sla_sys_id: string, error: string}
+     */
+    startSla: function(incidentGr, slaType) {
+        if (!incidentGr || !slaType) {
+            return {success: false, error: 'Missing required parameters'};
+        }
+
+        try {
+            var priority = parseInt(incidentGr.getValue('priority') || 3);
+            var config = slaType === 'response' ? this.SLA_CONFIG.response[priority] : this.SLA_CONFIG.resolution[priority];
+            
+            if (!config) {
+                return {success: false, error: 'No SLA configuration found for priority ' + priority};
+            }
+
+            // Check if SLA already exists and is running
+            var existingSla = new GlideRecord('task_sla');
+            existingSla.addQuery('task', incidentGr.getUniqueValue());
+            existingSla.addQuery('sla_type', slaType);
+            existingSla.addQuery('stage', 'in_progress');
+            existingSla.query();
+            if (existingSla.next()) {
+                return {success: true, sla_sys_id: existingSla.getUniqueValue(), message: 'SLA already running'};
+            }
+
+            // Create task_sla record
+            var slaGr = new GlideRecord('task_sla');
+            slaGr.initialize();
+            slaGr.task = incidentGr.getUniqueValue();
+            slaGr.sla = slaType === 'response' ? this.getResponseSlaDefinition(priority) : this.getResolutionSlaDefinition(priority);
+            slaGr.sla_type = slaType;
+            slaGr.stage = 'in_progress';
+            slaGr.start_time = new GlideDateTime();
+            
+            // Calculate business duration and end time
+            var duration = config.duration;
+            var startTime = new GlideDateTime();
+            slaGr.end_time = this.addBusinessDuration(startTime, duration);
+            slaGr.business_duration = duration;  // seconds
+            slaGr.percentage = 0;
+            
+            var slaSysId = slaGr.insert();
+
+            if (slaSysId) {
+                // Add work note
+                var slaLabel = config.name + ' (' + this.formatDuration(duration) + ')';
+                var workNotes = incidentGr.getValue('work_notes') || '';
+                workNotes += '\n[SLA] ' + slaLabel + ' started at ' + new GlideDateTime().getDisplayValue();
+                incidentGr.setValue('work_notes', workNotes);
+                // Use setWorkflow to avoid recursive trigger
+                incidentGr.setWorkflow(false);
+                incidentGr.update();
+
+                gs.info('SLAUtils: ' + slaLabel + ' started for incident ' + incidentGr.number);
+                
+                // Schedule notification timers
+                this.scheduleSlaNotifications(slaSysId, slaType, priority, slaGr.start_time);
+
+                return {
+                    success: true,
+                    sla_sys_id: slaSysId,
+                    sla_type: slaType,
+                    sla_name: config.name,
+                    duration: duration,
+                    duration_label: this.formatDuration(duration),
+                    message: config.name + ' started for incident ' + incidentGr.number
+                };
+            } else {
+                return {success: false, error: 'Failed to create SLA record'};
+            }
+        } catch (e) {
+            gs.error('SLAUtils: Error starting SLA - ' + e.message);
+            return {success: false, error: e.message};
+        }
+    },
+
+    /**
+     * Get the response SLA definition sys_id by priority
+     * Looks up contract_sla record by name
+     * @param {number} priority
+     * @returns {string} sys_id
+     */
+    getResponseSlaDefinition: function(priority) {
+        var config = this.SLA_CONFIG.response[priority];
+        if (!config) return '';
+        var gr = new GlideRecord('contract_sla');
+        if (gr.get('name', config.name)) {
+            return gr.getUniqueValue();
+        }
+        return '';
+    },
+
+    /**
+     * Get the resolution SLA definition sys_id by priority
+     * @param {number} priority
+     * @returns {string} sys_id
+     */
+    getResolutionSlaDefinition: function(priority) {
+        var config = this.SLA_CONFIG.resolution[priority];
+        if (!config) return '';
+        var gr = new GlideRecord('contract_sla');
+        if (gr.get('name', config.name)) {
+            return gr.getUniqueValue();
+        }
+        return '';
+    },
+
+    /**
+     * Add business duration to a datetime (simplified - non-24/7)
+     * In real implementation, use GlideCalendar or business schedule
+     * @param {GlideDateTime} startTime
+     * @param {number} durationSeconds
+     * @returns {GlideDateTime}
+     */
+    addBusinessDuration: function(startTime, durationSeconds) {
+        var endTime = new GlideDateTime(startTime);
+        endTime.addSeconds(durationSeconds);
+        return endTime;
+    },
+
+    /**
+     * Stop all running SLAs for an incident
+     * @param {GlideRecord} incidentGr - Incident GlideRecord
+     * @returns {boolean}
+     */
+    stopAllSlas: function(incidentGr) {
+        return this.stopSlas(incidentGr, null);
+    },
+
+    /**
+     * Stop SLAs for an incident (optionally filter by type)
+     * @param {GlideRecord} incidentGr
+     * @param {string} slaType - null for all, 'response' or 'resolution'
+     * @returns {boolean}
+     */
+    stopSlas: function(incidentGr, slaType) {
+        if (!incidentGr) return false;
+
+        try {
+            var gr = new GlideRecord('task_sla');
+            gr.addQuery('task', incidentGr.getUniqueValue());
+            gr.addQuery('stage', 'in_progress');
+            if (slaType) {
+                gr.addQuery('sla_type', slaType);
+            }
+            gr.query();
+
+            var stopped = 0;
+            while (gr.next()) {
+                gr.stage = 'completed';
+                gr.completion_time = new GlideDateTime();
+                gr.has_breached = false;
+                
+                // Calculate percentage completed
+                var startTime = new GlideDateTime(gr.getValue('start_time'));
+                var endTime = new GlideDateTime();
+                var slaDuration = parseInt(gr.getValue('business_duration')) || 3600;
+                var elapsed = GlideDateTime.subtract(startTime, endTime).getDisplayValue();
+                // Simplified: just set as completed
+                gr.percentage = 100;
+                gr.update();
+                stopped++;
+            }
+
+            if (stopped > 0) {
+                gs.info('SLAUtils: Stopped ' + stopped + ' SLA(s) for incident ' + incidentGr.number);
+            }
+
+            return true;
+        } catch (e) {
+            gs.error('SLAUtils: Error stopping SLAs - ' + e.message);
+            return false;
+        }
+    },
+
+    /**
+     * Mark an SLA as breached
+     * @param {string} slaSysId - task_sla sys_id
+     * @returns {boolean}
+     */
+    markSlaBreached: function(slaSysId) {
+        try {
+            var gr = new GlideRecord('task_sla');
+            if (gr.get(slaSysId)) {
+                gr.has_breached = true;
+                gr.stage = 'completed';
+                gr.percentage = 100;
+                gr.completion_time = new GlideDateTime();
+                gr.update();
+
+                // Trigger breach event
+                var incidentGr = new GlideRecord('incident');
+                if (incidentGr.get(gr.getValue('task'))) {
+                    gs.eventQueue('sla.breached', incidentGr, 
+                                  gr.getValue('sla_type'), 
+                                  gr.getDisplayValue('sla'));
+                    
+                    // Add work note
+                    var slaLabel = gr.getDisplayValue('sla');
+                    var notes = incidentGr.getValue('work_notes') || '';
+                    notes += '\n[SLA BREACHED] ' + slaLabel + ' has been breached at ' + new GlideDateTime().getDisplayValue();
+                    incidentGr.setValue('work_notes', notes);
+                    incidentGr.setWorkflow(false);
+                    incidentGr.update();
+                }
+
+                gs.info('SLAUtils: SLA ' + gr.getDisplayValue('sla') + ' marked as breached');
+                return true;
+            }
+            return false;
+        } catch (e) {
+            gs.error('SLAUtils: Error marking SLA breached - ' + e.message);
+            return false;
+        }
+    },
+
+    /**
+     * Update SLA percentage completion
+     * @param {GlideRecord} slaGr - task_sla GlideRecord
+     */
+    updateSlaPercentage: function(slaGr) {
+        if (!slaGr || slaGr.getValue('stage') !== 'in_progress') return;
+
+        var startTime = new GlideDateTime(slaGr.getValue('start_time'));
+        var now = new GlideDateTime();
+        var duration = parseInt(slaGr.getValue('business_duration')) || 3600;
+        
+        var elapsed = GlideDateTime.subtract(startTime, now);
+        var totalSeconds = this.glideDurationToSeconds(elapsed);
+        
+        var percentage = Math.min(100, Math.round((totalSeconds / duration) * 100));
+        slaGr.setValue('percentage', percentage);
+        
+        // Check for breach
+        if (percentage >= 100) {
+            slaGr.setValue('has_breached', true);
+            slaGr.setValue('stage', 'completed');
+            slaGr.setValue('completion_time', now);
+            gs.eventQueue('sla.breached', slaGr, slaGr.getValue('sla_type'), slaGr.getDisplayValue('sla'));
+        }
+    },
+
+    /**
+     * Convert GlideDuration to seconds
+     * @param {GlideDuration} duration
+     * @returns {number}
+     */
+    glideDurationToSeconds: function(duration) {
+        if (!duration) return 0;
+        var displayValue = duration.getDisplayValue();
+        // Parse format like "01:30:00" (HH:MM:SS)
+        var parts = displayValue.split(':');
+        if (parts.length === 3) {
+            return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+        }
+        return 0;
+    },
+
+    /**
+     * Schedule notification timers for an SLA
+     * Uses GlideRecord and scheduled jobs approach
+     * @param {string} slaSysId - task_sla sys_id
+     * @param {string} slaType - 'response' or 'resolution'
+     * @param {number} priority
+     * @param {GlideDateTime} startTime
+     */
+    scheduleSlaNotifications: function(slaSysId, slaType, priority, startTime) {
+        var config = slaType === 'response' ? this.SLA_CONFIG.response[priority] : this.SLA_CONFIG.resolution[priority];
+        if (!config) return;
+
+        var duration = config.duration;
+
+        // Schedule notifications at 75%, 90%, and 100% completion
+        for (var i = 0; i < this.NOTIFICATION_PERCENTAGES.length; i++) {
+            var pct = this.NOTIFICATION_PERCENTAGES[i];
+            var offsetSeconds = Math.round(duration * pct / 100);
+            
+            var notifyTime = new GlideDateTime(startTime);
+            notifyTime.addSeconds(offsetSeconds);
+            
+            // Record the scheduled notification in a custom approach
+            // In real implementation, use GlideScheduledJob or async business rules
+            // For demo, we'll store expected times to be checked by a scheduled job
+            this.recordSlaNotification(slaSysId, pct, notifyTime);
+        }
+    },
+
+    /**
+     * Record scheduled SLA notification for processing
+     * Uses a simple approach - stores notification schedule info
+     * @param {string} slaSysId - task_sla sys_id
+     * @param {number} percentage - 75, 90, or 100
+     * @param {GlideDateTime} notifyTime - When to send notification
+     */
+    recordSlaNotification: function(slaSysId, percentage, notifyTime) {
+        try {
+            // Store the notification schedule in a sys_properties approach
+            // For demo purpose, we'll use a simple log approach
+            var slaGr = new GlideRecord('task_sla');
+            if (slaGr.get(slaSysId)) {
+                var incidentNum = '';
+                var taskGr = new GlideRecord(slaGr.getValue('task_table'));
+                if (taskGr.get(slaGr.getValue('task'))) {
+                    incidentNum = taskGr.getValue('number');
+                }
+                gs.info('SLA Notification Scheduled: SLA=' + slaGr.getDisplayValue('sla') + 
+                        ', Percentage=' + percentage + '%, Incident=' + incidentNum + 
+                        ', NotifyTime=' + notifyTime.getDisplayValue());
+            }
+        } catch (e) {
+            gs.error('SLAUtils: Error recording notification schedule: ' + e.message);
+        }
+    },
+
+    /**
+     * Send SLA notification for an incident
+     * @param {GlideRecord} incidentGr
+     * @param {string} slaType - 'response' or 'resolution'
+     * @param {number} percentageCompleted
+     */
+    sendSlaNotification: function(incidentGr, slaType, percentageCompleted) {
+        if (!incidentGr) return;
+
+        try {
+            var eventName = '';
+            var eventParam2 = '';
+            
+            if (percentageCompleted >= 100) {
+                eventName = 'sla.breached';
+                eventParam2 = 'SLA Breached';
+            } else if (percentageCompleted >= 90) {
+                eventName = 'sla.90_percent';
+                eventParam2 = '90% of SLA duration elapsed';
+            } else if (percentageCompleted >= 75) {
+                eventName = 'sla.75_percent';
+                eventParam2 = '75% of SLA duration elapsed';
+            }
+            
+            if (eventName) {
+                gs.eventQueue(eventName, incidentGr, slaType, eventParam2);
+                gs.info('SLAUtils: Notification triggered: ' + eventName + ' for incident ' + incidentGr.number);
+            }
+        } catch (e) {
+            gs.error('SLAUtils: Error sending notification - ' + e.message);
+        }
+    },
+
+    /**
+     * Check and process pending SLA notifications
+     * This would typically be called by a Scheduled Job
+     * @returns {number} Number of notifications sent
+     */
+    processPendingNotifications: function() {
+        var count = 0;
+        var now = new GlideDateTime();
+        
+        var gr = new GlideRecord('task_sla');
+        gr.addQuery('stage', 'in_progress');
+        gr.query();
+        
+        while (gr.next()) {
+            var startTime = new GlideDateTime(gr.getValue('start_time'));
+            var duration = parseInt(gr.getValue('business_duration')) || 3600;
+            var elapsed = GlideDateTime.subtract(startTime, now);
+            var elapsedSeconds = this.glideDurationToSeconds(elapsed);
+            var percentage = Math.round((elapsedSeconds / duration) * 100);
+            
+            // Update percentage
+            gr.percentage = percentage;
+            
+            // Check notification thresholds
+            // Only send if we haven't already sent this notification
+            var lastNotified = parseInt(gr.getValue('u_last_notified_percentage') || 0);
+            
+            if (percentage >= 100 && lastNotified < 100) {
+                gr.has_breached = true;
+                gr.stage = 'completed';
+                gr.completion_time = now;
+                gr.u_last_notified_percentage = 100;
+                this.sendSlaNotification(
+                    new GlideRecord('incident').get(gr.getValue('task')) ? new GlideRecord('incident') : null,
+                    gr.getValue('sla_type'), 100
+                );
+                count++;
+            } else if (percentage >= 90 && lastNotified < 90) {
+                gr.u_last_notified_percentage = 90;
+                var incGr = new GlideRecord('incident');
+                if (incGr.get(gr.getValue('task'))) {
+                    this.sendSlaNotification(incGr, gr.getValue('sla_type'), 90);
+                    count++;
+                }
+            } else if (percentage >= 75 && lastNotified < 75) {
+                gr.u_last_notified_percentage = 75;
+                var incGr75 = new GlideRecord('incident');
+                if (incGr75.get(gr.getValue('task'))) {
+                    this.sendSlaNotification(incGr75, gr.getValue('sla_type'), 75);
+                    count++;
+                }
+            }
+            
+            gr.setWorkflow(false);
+            gr.update();
+        }
+        
+        return count;
+    },
+
+    /**
+     * Calculate priority based on urgency and impact
+     * @param {number} urgency - 1-3
+     * @param {number} impact - 1-3
+     * @returns {number} priority 1-5
+     */
+    calculatePriority: function(urgency, impact) {
+        var matrix = {
+            '1,1': 1, '1,2': 2, '1,3': 3,
+            '2,1': 2, '2,2': 3, '2,3': 4,
+            '3,1': 3, '3,2': 4, '3,3': 5
+        };
+        return matrix[urgency + ',' + impact] || 3;
+    },
+
+    type: 'SLAUtils'
+};

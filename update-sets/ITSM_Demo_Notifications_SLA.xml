@@ -1,0 +1,689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ============================================================
+  ITSM DEMO - Update Set 2: Notifications, SLA & KB Config
+  ============================================================
+  Contents:
+   1.  Update Set header
+   2.  8 SLA Definitions (contract_sla)
+   3.  13 Notifications (sysevent_email_action)
+   4.  1 Inbound Email Action (sys_inbound_email_action)
+   5.  2 Knowledge Bases (kb_knowledge_base)
+   6.  6 KB Categories (kb_category)
+   7.  8 Support Groups (sys_user_group)
+  ============================================================
+  Import: Navigate > System Update Sets > Retrieved Update Sets
+          > Import Update Set from XML > Select this file
+          > Preview > Commit
+  ============================================================
+-->
+<unload>
+  <!-- ========================================================== -->
+  <!-- Update Set Header                                           -->
+  <!-- ========================================================== -->
+  <sys_remote_update_set action="INSERT_OR_UPDATE">
+    <sys_id>itsm_demo_update_set_notif</sys_id>
+    <name>ITSM Demo - Notifications &amp; SLA</name>
+    <description>SLA Definitions, Email Notifications, Inbound Email Action, Knowledge Base config, Groups. Part 2 of 3.</description>
+    <release_date/>
+    <state>loaded</state>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <application/>
+  </sys_remote_update_set>
+
+  <!-- ========================================================== -->
+  <!-- RESPONSE SLA DEFINITIONS (incident table)                   -->
+  <!-- ========================================================== -->
+
+  <!-- Response SLA - Critical (Priority 1) - 15 minutes -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_resp_critical</sys_id>
+    <name>Response SLA - Critical</name>
+    <table>incident</table>
+    <type>response</type>
+    <business_duration>900</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>100</order>
+    <description>Response SLA for Critical priority incidents. First response within 15 minutes.</description>
+    <condition>current.priority == 1</condition>
+  </contract_sla>
+
+  <!-- Response SLA - High (Priority 2) - 1 hour -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_resp_high</sys_id>
+    <name>Response SLA - High</name>
+    <table>incident</table>
+    <type>response</type>
+    <business_duration>3600</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>200</order>
+    <description>Response SLA for High priority incidents. First response within 1 hour.</description>
+    <condition>current.priority == 2</condition>
+  </contract_sla>
+
+  <!-- Response SLA - Medium (Priority 3) - 4 hours -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_resp_medium</sys_id>
+    <name>Response SLA - Medium</name>
+    <table>incident</table>
+    <type>response</type>
+    <business_duration>14400</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>300</order>
+    <description>Response SLA for Medium priority incidents. First response within 4 hours.</description>
+    <condition>current.priority == 3</condition>
+  </contract_sla>
+
+  <!-- Response SLA - Low (Priority 4) - 8 hours -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_resp_low</sys_id>
+    <name>Response SLA - Low</name>
+    <table>incident</table>
+    <type>response</type>
+    <business_duration>28800</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>400</order>
+    <description>Response SLA for Low priority incidents. First response within 8 hours.</description>
+    <condition>current.priority == 4</condition>
+  </contract_sla>
+
+  <!-- Resolution SLA - Critical (Priority 1) - 1 hour -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_reso_critical</sys_id>
+    <name>Resolution SLA - Critical</name>
+    <table>incident</table>
+    <type>resolution</type>
+    <business_duration>3600</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>500</order>
+    <description>Resolution SLA for Critical priority incidents. Resolve within 1 hour.</description>
+    <condition>current.priority == 1</condition>
+  </contract_sla>
+
+  <!-- Resolution SLA - High (Priority 2) - 4 hours -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_reso_high</sys_id>
+    <name>Resolution SLA - High</name>
+    <table>incident</table>
+    <type>resolution</type>
+    <business_duration>14400</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>600</order>
+    <description>Resolution SLA for High priority incidents. Resolve within 4 hours.</description>
+    <condition>current.priority == 2</condition>
+  </contract_sla>
+
+  <!-- Resolution SLA - Medium (Priority 3) - 24 hours -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_reso_medium</sys_id>
+    <name>Resolution SLA - Medium</name>
+    <table>incident</table>
+    <type>resolution</type>
+    <business_duration>86400</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>700</order>
+    <description>Resolution SLA for Medium priority incidents. Resolve within 24 hours.</description>
+    <condition>current.priority == 3</condition>
+  </contract_sla>
+
+  <!-- Resolution SLA - Low (Priority 4) - 48 hours -->
+  <contract_sla action="INSERT_OR_UPDATE">
+    <sys_id>itsm_sla_reso_low</sys_id>
+    <name>Resolution SLA - Low</name>
+    <table>incident</table>
+    <type>resolution</type>
+    <business_duration>172800</business_duration>
+    <duration_type>minutes</duration_type>
+    <active>true</active>
+    <order>800</order>
+    <description>Resolution SLA for Low priority incidents. Resolve within 48 hours.</description>
+    <condition>current.priority == 4</condition>
+  </contract_sla>
+
+  <!-- ========================================================== -->
+  <!-- NOTIFICATIONS                                               -->
+  <!-- ========================================================== -->
+
+  <!-- Incident Created -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_inc_created</sys_id>
+    <name>Incident Created</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>incident.created</event_name>
+    <description>Sent when a new incident is created</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+    </recipients>
+    <subject>[New Incident] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #2a6bb6;">New Incident Created</h2>
+<p>Incident <b>${number}</b> has been created.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td><td style="padding: 8px; border: 1px solid #ddd;">${category}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Caller</td><td style="padding: 8px; border: 1px solid #ddd;">${caller_id}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Assignment Group</td><td style="padding: 8px; border: 1px solid #ddd;">${assignment_group}</td></tr>
+</table>
+<p>Please review and take appropriate action.</p>
+<p><a href="${URI_REF}" style="background: #2a6bb6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Incident Assigned -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_inc_assigned</sys_id>
+    <name>Incident Assigned</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>incident.assigned</event_name>
+    <description>Sent when an incident is assigned to a group or user</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[Assigned] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #2a6bb6;">Incident Assigned</h2>
+<p>Incident <b>${number}</b> has been assigned to <b>${assignment_group}</b>.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Assignment Group</td><td style="padding: 8px; border: 1px solid #ddd;">${assignment_group}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #2a6bb6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Incident State Changed -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_inc_state_chg</sys_id>
+    <name>Incident State Changed</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>incident.state_changed</event_name>
+    <description>Sent when incident state changes</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+      <recipient type="caller"/>
+    </recipients>
+    <subject>[State Changed] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #2a6bb6;">Incident State Changed</h2>
+<p>Incident <b>${number}</b> state has been updated.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Current State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Assignment Group</td><td style="padding: 8px; border: 1px solid #ddd;">${assignment_group}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #2a6bb6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Incident Escalated -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_inc_esc</sys_id>
+    <name>Incident Escalated</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>incident.escalated</event_name>
+    <description>Sent when incident is escalated to L2</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[ESCALATED] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #d9534f;">Incident Escalated to L2</h2>
+<p>Incident <b>${number}</b> has been escalated to L2 Support Team.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Problem Created -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_prob_created</sys_id>
+    <name>Problem Created</name>
+    <active>true</active>
+    <table>problem</table>
+    <event_name>problem.created</event_name>
+    <description>Sent when a new problem is created</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+    </recipients>
+    <subject>[New Problem] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #f0ad4e;">New Problem Created</h2>
+<p>Problem <b>${number}</b> has been created.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td><td style="padding: 8px; border: 1px solid #ddd;">${category}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #f0ad4e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Problem</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Problem State Changed -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_prob_state_chg</sys_id>
+    <name>Problem State Changed</name>
+    <active>true</active>
+    <table>problem</table>
+    <event_name>problem.state_changed</event_name>
+    <description>Sent when problem state changes</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[State Changed] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #f0ad4e;">Problem State Changed</h2>
+<p>Problem <b>${number}</b> state has been updated.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Current State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #f0ad4e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Problem</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Change Created -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_chg_created</sys_id>
+    <name>Change Created</name>
+    <active>true</active>
+    <table>change_request</table>
+    <event_name>change.created</event_name>
+    <description>Sent when a new change request is created</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[New Change] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #5cb85c;">New Change Created</h2>
+<p>Change <b>${number}</b> has been created.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Type</td><td style="padding: 8px; border: 1px solid #ddd;">${type}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Change</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Change State Changed -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_chg_state_chg</sys_id>
+    <name>Change State Changed</name>
+    <active>true</active>
+    <table>change_request</table>
+    <event_name>change.state_changed</event_name>
+    <description>Sent when change state changes</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[State Changed] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #5cb85c;">Change State Updated</h2>
+<p>Change <b>${number}</b> state has been updated.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Current State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #5cb85c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Change</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- CAB Approval Required -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_chg_cab</sys_id>
+    <name>CAB Approval Required</name>
+    <active>true</active>
+    <table>change_request</table>
+    <event_name>change.cab_approval</event_name>
+    <description>Sent when CAB approval is required for a change</description>
+    <recipients>
+      <recipient type="group" field="cab_group"/>
+    </recipients>
+    <subject>[CAB Approval] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #d9534f;">CAB Approval Required</h2>
+<p>Change <b>${number}</b> requires CAB approval.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Risk</td><td style="padding: 8px; border: 1px solid #ddd;">${risk}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Start Date</td><td style="padding: 8px; border: 1px solid #ddd;">${start_date}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">End Date</td><td style="padding: 8px; border: 1px solid #ddd;">${end_date}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Review Change</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- Knowledge Article Pending Approval -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_kb_approval</sys_id>
+    <name>Knowledge Article Pending Approval</name>
+    <active>true</active>
+    <table>kb_knowledge</table>
+    <event_name>knowledge.article.pending_approval</event_name>
+    <description>Sent when a knowledge article requires approval to publish</description>
+    <recipients>
+      <recipient type="role">knowledge_manager</recipient>
+      <recipient type="role">knowledge_admin</recipient>
+    </recipients>
+    <subject>[KB Approval] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #f0ad4e;">Knowledge Article Pending Approval</h2>
+<p>Article <b>${number}</b> requires your approval to publish.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Title</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Knowledge Base</td><td style="padding: 8px; border: 1px solid #ddd;">${kb_knowledge_base}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Category</td><td style="padding: 8px; border: 1px solid #ddd;">${kb_category}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Author</td><td style="padding: 8px; border: 1px solid #ddd;">${author}</td></tr>
+</table>
+<p><a href="${URI_REF}" style="background: #f0ad4e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Review Article</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- SLA 75% Warning -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_sla_75_pct</sys_id>
+    <name>SLA - 75% Warning</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>sla.75_percent</event_name>
+    <description>Sent when 75% of SLA duration has elapsed</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[SLA WARNING - 75%] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #f0ad4e;">⚠️ SLA Warning - 75% Elapsed</h2>
+<p>Incident <b>${number}</b> has reached <b>75%</b> of its SLA duration.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Assignment Group</td><td style="padding: 8px; border: 1px solid #ddd;">${assignment_group}</td></tr>
+</table>
+<h3 style="color: #d9534f;">Please take immediate action to avoid SLA breach.</h3>
+<p><a href="${URI_REF}" style="background: #f0ad4e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- SLA 90% Urgent Warning -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_sla_90_pct</sys_id>
+    <name>SLA - 90% Urgent Warning</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>sla.90_percent</event_name>
+    <description>Sent when 90% of SLA duration has elapsed</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+    </recipients>
+    <subject>[SLA URGENT - 90%] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #d9534f;">🔴 SLA Urgent - 90% Elapsed</h2>
+<p>Incident <b>${number}</b> has reached <b>90%</b> of its SLA duration.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+</table>
+<h3 style="color: #d9534f;">SLA breach imminent! Immediate action required!</h3>
+<p><a href="${URI_REF}" style="background: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- SLA Breach -->
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_notif_sla_breach</sys_id>
+    <name>SLA - Breach</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>sla.breached</event_name>
+    <description>Sent when SLA has been breached</description>
+    <recipients>
+      <recipient type="group" field="assignment_group"/>
+      <recipient type="user" field="assigned_to"/>
+      <recipient type="caller"/>
+    </recipients>
+    <subject>[SLA BREACHED] ${number} - ${short_description}</subject>
+    <message_html><![CDATA[
+<html><body style="font-family: Arial, sans-serif; color: #333;">
+<h2 style="color: #d9534f;">🚨 SLA BREACHED</h2>
+<p>Incident <b>${number}</b> has breached its SLA.</p>
+<table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Short Description</td><td style="padding: 8px; border: 1px solid #ddd;">${short_description}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Priority</td><td style="padding: 8px; border: 1px solid #ddd;">${priority}</td></tr>
+<tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+</table>
+<h3 style="color: #d9534f;">This incident has breached SLA. Management escalation may be required.</h3>
+<p><a href="${URI_REF}" style="background: #d9534f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">View Incident</a></p>
+</body></html>
+    ]]></message_html>
+  </sysevent_email_action>
+
+  <!-- ========================================================== -->
+  <!-- INBOUND EMAIL ACTION                                        -->
+  <!-- ========================================================== -->
+  <sys_inbound_email_action action="INSERT_OR_UPDATE">
+    <sys_id>itsm_inbound_email_create_inc</sys_id>
+    <name>Create Incident from Email</name>
+    <active>true</active>
+    <table>incident</table>
+    <type>new</type>
+    <action_order>100</action_order>
+    <script><![CDATA[
+(function runAction(/*GlideRecord*/ current, /*GlideRecord*/ event, /*EmailWrapper*/ email, /*ScopedEmailLogger*/ logger) {
+    try {
+        var parser = new ITSMEmailParser();
+        var parsed = parser.parseAndCreateIncident(email, current);
+        
+        if (parsed) {
+            current.subject = 'Incident created from email: ' + email.subject;
+            current.contact_type = 'email';
+            
+            gs.info('Inbound Email: Incident created from email - Subject: ' + email.subject);
+        } else {
+            gs.warn('Inbound Email: Failed to parse email for incident creation');
+        }
+    } catch (e) {
+        gs.error('Inbound Email: Error in Create Incident from Email - ' + e.message);
+    }
+})(current, event, email, logger);
+    ]]></script>
+  </sys_inbound_email_action>
+
+  <!-- ========================================================== -->
+  <!-- KNOWLEDGE BASES                                             -->
+  <!-- ========================================================== -->
+
+  <!-- Knowledge Base 1: Technical Knowledge Base -->
+  <kb_knowledge_base action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_technical</sys_id>
+    <name>Technical Knowledge Base</name>
+    <title>Technical Knowledge Base</title>
+    <description>Technical knowledge base for internal support teams. Access restricted to technical support staff (L1, L2, L3). Articles require approval before publishing.</description>
+    <retire_article_days>365</retire_article_days>
+    <is_valid>true</is_valid>
+    <order>100</order>
+  </kb_knowledge_base>
+
+  <!-- Knowledge Base 2: Employee Knowledge Base -->
+  <kb_knowledge_base action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_employee</sys_id>
+    <name>Employee Knowledge Base</name>
+    <title>Employee Knowledge Base</title>
+    <description>Employee knowledge base available to all staff. Contains FAQs, how-to guides, company policies. Articles are auto-published.</description>
+    <retire_article_days>365</retire_article_days>
+    <is_valid>true</is_valid>
+    <order>200</order>
+  </kb_knowledge_base>
+
+  <!-- KB Category: Technical - Hardware -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_tech_hw</sys_id>
+    <label>Hardware Troubleshooting</label>
+    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <order>100</order>
+  </kb_category>
+
+  <!-- KB Category: Technical - Software -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_tech_sw</sys_id>
+    <label>Software Troubleshooting</label>
+    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <order>200</order>
+  </kb_category>
+
+  <!-- KB Category: Technical - Network -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_tech_nw</sys_id>
+    <label>Network Troubleshooting</label>
+    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <order>300</order>
+  </kb_category>
+
+  <!-- KB Category: Employee - General -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_emp_gen</sys_id>
+    <label>General Information</label>
+    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <order>100</order>
+  </kb_category>
+
+  <!-- KB Category: Employee - FAQ -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_emp_faq</sys_id>
+    <label>Frequently Asked Questions</label>
+    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <order>200</order>
+  </kb_category>
+
+  <!-- KB Category: Employee - Policy -->
+  <kb_category action="INSERT_OR_UPDATE">
+    <sys_id>itsm_kb_cat_emp_pol</sys_id>
+    <label>Company Policies</label>
+    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <order>300</order>
+  </kb_category>
+
+  <!-- ========================================================== -->
+  <!-- SUPPORT GROUPS                                              -->
+  <!-- ========================================================== -->
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_hw</sys_id>
+    <name>Hardware Support</name>
+    <type>itsm_l1_group</type>
+    <description>L1 - Hardware Incident Support</description>
+    <active>true</active>
+    <manager/>
+    <roles/>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_sw</sys_id>
+    <name>Software Support</name>
+    <type>itsm_l1_group</type>
+    <description>L1 - Software Incident Support</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_nw</sys_id>
+    <name>Network Support</name>
+    <type>itsm_l1_group</type>
+    <description>L1 - Network Incident Support</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_oth</sys_id>
+    <name>Others Support</name>
+    <type>itsm_l1_group</type>
+    <description>L1 - Other Category Incident Support</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_l2</sys_id>
+    <name>L2 Support Team</name>
+    <type>itsm_l2_group</type>
+    <description>L2 - Escalated Incident Support</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_chg_infra</sys_id>
+    <name>Change Management - Infrastructure</name>
+    <type>itsm_l3_group</type>
+    <description>L3 - Infrastructure Change Management</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_chg_app</sys_id>
+    <name>Change Management - Application</name>
+    <type>itsm_l3_group</type>
+    <description>L3 - Application Change Management</description>
+    <active>true</active>
+  </sys_user_group>
+
+  <sys_user_group action="INSERT_OR_UPDATE">
+    <sys_id>itsm_grp_chg_sec</sys_id>
+    <name>Change Management - Security</name>
+    <type>itsm_l3_group</type>
+    <description>L3 - Security Change Management</description>
+    <active>true</active>
+  </sys_user_group>
+
+</unload>

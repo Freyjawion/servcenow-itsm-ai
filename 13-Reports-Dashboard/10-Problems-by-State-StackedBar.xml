@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <!-- 
+    Report: Problems by State (Stacked Bar)
+    Type: Stacked Bar Chart
+    Table: problem
+    Group By: State
+    Time filter enabled: Yes
+  -->
+  <sys_reports action="INSERT_OR_UPDATE">
+    <sys_id>itsm_rpt_problem_state_bar</sys_id>
+    <name>Problems by State</name>
+    <title>Problems by State</title>
+    <table>problem</table>
+    <type>bar</type>
+    <active>true</active>
+    <group_by>state</group_by>
+    <aggregate>COUNT</aggregate>
+    <show_condition>true</show_condition>
+    <order_direction>DESC</order_direction>
+    <order_by>2</order_by>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <description>Stacked bar chart showing the distribution of problems by state. Provides visibility into the problem management pipeline from New through Under Review to Resolved/Closed.</description>
+    <filter_condition>active=true</filter_condition>
+    <roles/>
+    <time_range_select>true</time_range_select>
+    <chart_type>bar</chart_type>
+    <stacked>true</stacked>
+    <show_data_labels>true</show_data_labels>
+    <show_legend>true</show_legend>
+    <legend_position>bottom</legend_position>
+    <color_map>
+      <color state="1" value="#007bff"/>  <!-- New - Blue -->
+      <color state="2" value="#ffc107"/>  <!-- Assess - Yellow -->
+      <color state="3" value="#fd7e14"/>  <!-- Root Cause Analysis - Orange -->
+      <!-- state 4 = Fix in Progress -->
+      <color state="4" value="#17a2b8"/>  <!-- Fix in Progress - Teal -->
+      <!-- state 5 = Resolved -->
+      <color state="5" value="#28a745"/>  <!-- Resolved - Green -->
+      <!-- state 6 = Closed -->
+      <color state="6" value="#6c757d"/>  <!-- Closed - Gray -->
+    </color_map>
+  </sys_reports>
+</unload>

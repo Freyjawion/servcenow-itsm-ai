@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <!-- 
+    Report: Incident Category × Priority Matrix (Pivot Table)
+    Type: Pivot Table
+    Table: Incident
+    Row: Category
+    Column: Priority
+    Value: COUNT
+    Time filter enabled: Yes
+  -->
+  <sys_reports action="INSERT_OR_UPDATE">
+    <sys_id>itsm_rpt_inc_cat_pri_pivot</sys_id>
+    <name>Category × Priority Matrix</name>
+    <title>Category × Priority Matrix</title>
+    <table>incident</table>
+    <type>pivot</type>
+    <active>true</active>
+    <group_by>category</group_by>
+    <group_by_second>priority</group_by_second>
+    <aggregate>COUNT</aggregate>
+    <show_condition>true</show_condition>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <description>
+      Pivot table cross-referencing Incident Category against Priority levels.
+      Provides a matrix view to identify which categories generate the most critical/high priority incidents.
+      Rows = Category (Hardware, Software, Network, Others)
+      Columns = Priority (1-Critical through 5-Planning)
+      Values = Incident Count
+    </description>
+    <filter_condition>active=true</filter_condition>
+    <roles/>
+    <time_range_select>true</time_range_select>
+    <time_series>false</time_series>
+    <pivot_width>100</pivot_width>
+    <show_row_total>true</show_row_total>
+    <show_column_total>true</show_column_total>
+    <show_grand_total>true</show_grand_total>
+  </sys_reports>
+</unload>
