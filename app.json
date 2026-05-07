@@ -1,0 +1,10 @@
+{
+  "name": "ITSM_Demo",
+  "display_name": "ITSM Demo",
+  "description": "ITSM Demo with L1/L2/L3 Support Groups - Incident/Problem/Change/KB/SLA/Reports",
+  "version": "1.0.0",
+  "scope": "global",
+  "isApp": true,
+  "publisher": "ITSM Demo Team",
+  "license": "private"
+}
