@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sysevent_email_action">
+  <sysevent_email_action action="INSERT_OR_UPDATE">
+    <sys_id>cbb4a79cc3f04710feff9d777d0131048</sys_id>
+<name>Incident Created</name>
+    <active>true</active>
+    <table>incident</table>
+    <event_name>incident.created</event_name>
+    <description>Sent when a new incident is created and assigned to a group</description>
+    <recipients>
+      <recipient type="group">assignment_group</recipient>
+      <recipient type="caller">caller_id</recipient>
+    </recipients>
+    <subject>New Incident Created: ${number} - ${short_description}</subject>
+    <message_html>
+<html>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+  <h2 style="color: #2c3e50;">🔔 New Incident Created</h2>
+  
+  <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057; width: 120px;">Incident #</td>
+        <td style="padding: 8px;"><a href="${URI_REF}">${number}</a></td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">State</td>
+        <td style="padding: 8px;">${state}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Category</td>
+        <td style="padding: 8px;">${category}</td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Subcategory</td>
+        <td style="padding: 8px;">${subcategory}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Assignment Group</td>
+        <td style="padding: 8px;"><strong>${assignment_group}</strong></td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Caller</td>
+        <td style="padding: 8px;">${caller_id}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Urgency</td>
+        <td style="padding: 8px;">${urgency}</td>
+      </tr>
+      <tr style="background: #fff;">
+        <td style="padding: 8px; font-weight: bold; color: #495057;">Impact</td>
+        <td style="padding: 8px;">${impact}</td>
+      </tr>
+    </table>
+  </div>
+  
+  <h3 style="color: #2c3e50;">Short Description</h3>
+  <p style="background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">${short_description}</p>
+  
+  <h3 style="color: #2c3e50;">Description</h3>
+  <p style="background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">${description}</p>
+  
+  <div style="margin-top: 25px; padding: 15px; background: #e8f4f8; border-radius: 6px;">
+    <p style="margin: 0; color: #2c3e50;">
+      📍 <a href="${URI_REF}" style="color: #3498db;">Click here to view this incident in ServiceNow</a>
+    </p>
+  </div>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+  <p style="color: #999; font-size: 12px;">
+    This is an automated notification from ServiceNow ITSM Demo.
+    Please do not reply to this email.
+  </p>
+</body>
+</html>
+    </message_html>
+    <weight>100</weight>
+    <sys_package display_value="ITSM Demo" source="x_1906798_itsm_d_0">cbb4a79cc3f04710feff9d777d013111</sys_package>
+    <sys_scope>cbb4a79cc3f04710feff9d777d013111</sys_scope>
+    <sys_update_name>sysevent_email_action_cbb4a79cc3f04710feff9d777d0131048</sys_update_name>
+  </sysevent_email_action>
+</record_update>

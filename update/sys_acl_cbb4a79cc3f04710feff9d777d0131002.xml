@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_acl">
+  <sys_acl action="INSERT_OR_UPDATE">
+    <sys_id>cbb4a79cc3f04710feff9d777d0131002</sys_id>
+<name>incident</name>
+    
+    <type>read</type>
+    <operation>read</operation>
+    <script>
+      // ACL: L1 agents can only read incidents assigned to their own groups
+      // This works alongside the before query business rule
+      
+      // Admin can always read
+      if (gs.hasRole('admin')) {
+        return true;
+      }
+      
+      // L2 agents can read all incidents
+      if (gs.hasRole('itsm_l2_agent')) {
+        return true;
+      }
+      
+      // L3 agents can read incidents assigned to their groups
+      if (gs.hasRole('itsm_l3_agent')) {
+        var userGroups = [];
+        var gr = new GlideRecord('sys_user_grmember');
+        gr.addQuery('user', gs.getUserID());
+        gr.query();
+        while (gr.next()) {
+          userGroups.push(gr.getValue('group'));
+        }
+        if (userGroups.indexOf(current.assignment_group.toString()) >= 0) {
+          return true;
+        }
+        return false;
+      }
+      
+      // Normal users can only read incidents they created
+      if (!gs.hasRole('itsm_l1_agent') && !gs.hasRole('itsm_l2_agent') && !gs.hasRole('itsm_l3_agent')) {
+        if (current.caller_id.toString() === gs.getUserID()) {
+          return true;
+        }
+        return false;
+      }
+      
+      // L1 agents - checked by the before query business rule
+      if (gs.hasRole('itsm_l1_agent')) {
+        var myGroups = [];
+        var member = new GlideRecord('sys_user_grmember');
+        member.addQuery('user', gs.getUserID());
+        member.query();
+        while (member.next()) {
+          myGroups.push(member.getValue('group'));
+        }
+        if (myGroups.indexOf(current.assignment_group.toString()) >= 0) {
+          return true;
+        }
+        return false;
+      }
+      
+      return true;
+    </script>
+    <condition></condition>
+    <sys_name>incident - L1 read access</sys_name>
+    <sys_package display_value="ITSM Demo" source="x_1906798_itsm_d_0">cbb4a79cc3f04710feff9d777d013111</sys_package>
+    <sys_scope>cbb4a79cc3f04710feff9d777d013111</sys_scope>
+    <sys_update_name>sys_acl_cbb4a79cc3f04710feff9d777d0131002</sys_update_name>
+  </sys_acl>
+</record_update>

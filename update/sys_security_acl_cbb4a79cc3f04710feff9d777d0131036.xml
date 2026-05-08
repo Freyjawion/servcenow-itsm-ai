@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_security_acl">
+  <sys_security_acl action="INSERT_OR_UPDATE">
+    <sys_id>cbb4a79cc3f04710feff9d777d0131036</sys_id>
+<name>kb_knowledge.employee.read</name>
+    <type>record</type>
+    <operation>read</operation>
+    <name>kb_knowledge</name>
+    <roles>kb_employee_user</roles>
+    <script><![CDATA[
+    (function evaluateRule(current, table) {
+      // Allow any authenticated user to read Employee KB articles
+      // Check if article belongs to Employee KB
+      if (!current) return false;
+      
+      var kbGr = new GlideRecord('kb_knowledge_base');
+      if (kbGr.get('name', 'Employee Knowledge Base')) {
+        var kbSysId = kbGr.getUniqueValue();
+        if (current.getValue('kb_knowledge_base') === kbSysId) {
+          return true;
+        }
+      }
+      
+      return false;
+    })(current, table);
+    ]]></script>
+    <order>300</order>
+    <sys_package display_value="ITSM Demo" source="x_1906798_itsm_d_0">cbb4a79cc3f04710feff9d777d013111</sys_package>
+    <sys_scope>cbb4a79cc3f04710feff9d777d013111</sys_scope>
+    <sys_update_name>sys_security_acl_cbb4a79cc3f04710feff9d777d0131036</sys_update_name>
+  </sys_security_acl>
+</record_update>

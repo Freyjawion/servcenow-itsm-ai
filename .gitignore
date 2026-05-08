@@ -9,20 +9,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# OS files
-.DS_Store
-Thumbs.db
-*.bak
-*.swp
-*.swo
-
-# IDE
-.vscode/
-.idea/
-
 # Temp scripts
-fix_xmls.ps1
+*.ps1
+*.psm1
 
-# Misc
-*.csv
-/README.md
+# Ignore update set backups (replaced by Studio format)
+update-sets/

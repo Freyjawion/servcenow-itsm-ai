@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<record_update table="sys_script">
+  <sys_script action="INSERT_OR_UPDATE">
+    <sys_id>cbb4a79cc3f04710feff9d777d0130011</sys_id>
+    <description>Triggers notifications on state change</description>
+    <event></event>
+    <priority>100</priority>
+    <abort_action>false</abort_action>
+    <order>300</order>
+    <filter_condition></filter_condition>
+    <table>incident</table>
+    <script><![CDATA[/**
+ * Business Rule: State Change Notification Trigger
+ * 
+ * Table: incident
+ * When: after | update
+ * Condition: current.state.changes()
+ * Order: 300
+ * 
+ * Description:
+ * Triggers appropriate notifications when the incident state changes.
+ * Also sends assignment notification if assignment group changed simultaneously.
+ */
+
+(function executeRule(current, previous /*null when async*/) {
+    
+    var notif = new ITSMNotificationUtils();
+    
+    // Send state change notification
+    notif.sendStateChangeNotification(current, previous.getValue('state'));
+    
+    // Check if assignment group also changed
+    if (current.assignment_group.changes()) {
+        notif.sendAssignedNotification(current, previous.getValue('assignment_group'));
+    }
+    
+    // If incident is resolved, log the resolution
+    if (current.state == 6) { // Resolved
+        gs.info('Incident ' + current.number + ' has been resolved by ' + 
+                 gs.getUserDisplayName());
+    }
+    
+    // If incident is closed, log closure
+    if (current.state == 7) { // Closed
+        gs.info('Incident ' + current.number + ' has been closed');
+    }
+
+})(current, previous);
+]]></script>
+    <name>State Change Notification Trigger</name>
+    <active>true</active>
+    <when>after</when>
+    <action>after</action>
+    <sys_package display_value="ITSM Demo" source="x_1906798_itsm_d_0">cbb4a79cc3f04710feff9d777d013111</sys_package>
+    <sys_scope>cbb4a79cc3f04710feff9d777d013111</sys_scope>
+    <sys_update_name>sys_script_cbb4a79cc3f04710feff9d777d0130011</sys_update_name>
+  </sys_script>
+</record_update>
