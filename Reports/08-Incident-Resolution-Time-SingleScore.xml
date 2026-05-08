@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <!-- 
+    Report: Average Resolution Time (Single Score)
+    Type: Single Score
+    Table: incident
+    Metric: Average of Calendar Duration (sys_created_on → sys_updated_on with state 7)
+    Time filter enabled: Yes
+  -->
+  <sys_reports action="INSERT_OR_UPDATE">
+    <sys_id>itsm_rpt_inc_reso_score</sys_id>
+    <name>Average Resolution Time</name>
+    <title>Average Resolution Time</title>
+    <table>incident</table>
+    <type>singlescore</type>
+    <active>true</active>
+    <aggregate>AVG</aggregate>
+    <aggregate_field>calendar_duration</aggregate_field>
+    <show_condition>true</show_condition>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <description>
+      Single score metric showing the average time taken to resolve incidents.
+      Calculated as the average calendar duration of all closed/resolved incidents.
+      Provides a quick at-a-glance view of resolution performance.
+    </description>
+    <filter_condition>stateIN6,7^ORDERBYDESCsys_updated_on</filter_condition>
+    <roles/>
+    <time_range_select>true</time_range_select>
+    <time_range>last_30_days</time_range>
+    <show_label>true</show_label>
+    <label>Average Resolution Time</label>
+    <score_color_upper>#28a745</score_color_upper>
+    <score_color_lower>#dc3545</score_color_lower>
+    <threshold_upper>3600</threshold_upper>  <!-- Green if < 1 hour -->
+    <threshold_lower>86400</threshold_lower>  <!-- Red if > 24 hours -->
+    <show_goal>true</show_goal>
+    <goal_value>43200</goal_value>  <!-- Target: 12 hours -->
+    <goal_label>Target: 12 hours</goal_label>
+    <score_unit>hours</score_unit>
+    <score_format>duration</score_format>
+    <score_precision>1</score_precision>
+  </sys_reports>
+</unload>

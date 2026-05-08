@@ -1,0 +1,420 @@
+/**
+ * ChangeUtils
+ * 
+ * Description: Utility class for Change Management operations.
+ * Handles infrastructure change flow, automatic change task creation,
+ * CAB approval logic, and state transition management.
+ * 
+ * Business Rules Applied:
+ * - Infrastructure changes trigger specific flow
+ * - High priority changes require CAB approval
+ * - Infrastructure changes auto-create 2 tasks when scheduled
+ * - State changes trigger notifications
+ * 
+ * Usage:
+ *   var cu = new ChangeUtils();
+ *   cu.createChangeFromProblem(problemGr);
+ *   cu.isInfrastructureChange(changeGr);
+ *   cu.autoCreateChangeTasks(changeGr);
+ */
+
+var ChangeUtils = Class.create();
+ChangeUtils.prototype = {
+    initialize: function() {},
+
+    /**
+     * Check if current user can create changes (L2 or L3 group member)
+     * @returns {boolean}
+     */
+    canCreateChange: function() {
+        if (gs.hasRole('admin')) return true;
+        if (gs.hasRole('change_manager')) return true;
+        if (gs.hasRole('itsm_l2_agent') || gs.hasRole('itsm_l3_agent')) return true;
+
+        var userGroups = this.getUserGroups();
+        var allowedTypes = ['itsm_l2_group', 'itsm_l3_group'];
+        
+        for (var i = 0; i < userGroups.length; i++) {
+            var gr = new GlideRecord('sys_user_group');
+            if (gr.get(userGroups[i])) {
+                var type = gr.getValue('type');
+                for (var j = 0; j < allowedTypes.length; j++) {
+                    if (type === allowedTypes[j]) return true;
+                }
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Get current user's groups
+     * @returns {Array} Array of group sys_ids
+     */
+    getUserGroups: function() {
+        var groups = [];
+        var gr = new GlideRecord('sys_user_grmember');
+        gr.addQuery('user', gs.getUserID());
+        gr.query();
+        while (gr.next()) {
+            groups.push(gr.getValue('group'));
+        }
+        return groups;
+    },
+
+    /**
+     * Check if a change is an Infrastructure type change
+     * @param {GlideRecord} changeGr - Change request GlideRecord
+     * @returns {boolean}
+     */
+    isInfrastructureChange: function(changeGr) {
+        if (!changeGr) return false;
+        var type = changeGr.getValue('type');
+        var category = changeGr.getValue('category');
+        
+        // Check by type field (custom type) or category
+        if (type === 'infrastructure' || type === 'Infrastructure') return true;
+        
+        // Check if assigned to infrastructure change group
+        var assignmentGroup = changeGr.getDisplayValue('assignment_group');
+        if (assignmentGroup && assignmentGroup.toLowerCase().indexOf('infrastructure') >= 0) return true;
+        
+        return false;
+    },
+
+    /**
+     * Check if the change has high priority requiring CAB approval
+     * @param {GlideRecord} changeGr - Change request GlideRecord
+     * @returns {boolean}
+     */
+    isHighPriority: function(changeGr) {
+        if (!changeGr) return false;
+        var priority = changeGr.getValue('priority');
+        // Priority 1 (Critical) or 2 (High) require CAB approval
+        return (priority === '1' || priority === '2');
+    },
+
+    /**
+     * Create a change request from a problem
+     * @param {GlideRecord} problemGr - The problem GlideRecord
+     * @param {Object} params - Additional parameters
+     * @returns {Object} - {success: boolean, number: string, sys_id: string, error: string}
+     */
+    createChangeFromProblem: function(problemGr, params) {
+        if (!problemGr) {
+            return {success: false, error: 'No problem provided'};
+        }
+
+        if (!this.canCreateChange()) {
+            return {success: false, error: 'Only L2 or L3 support members can create changes'};
+        }
+
+        try {
+            var changeGr = new GlideRecord('change_request');
+            changeGr.initialize();
+
+            // Copy fields from problem
+            changeGr.short_description = 'Change: ' + problemGr.getValue('short_description');
+            changeGr.description = this.buildChangeDescription(problemGr);
+            changeGr.category = problemGr.getValue('category');
+            changeGr.subcategory = problemGr.getValue('subcategory');
+            changeGr.urgency = problemGr.getValue('urgency');
+            changeGr.impact = problemGr.getValue('impact');
+            
+            // Set priority based on urgency * impact
+            var urgency = parseInt(problemGr.getValue('urgency') || 2);
+            var impact = parseInt(problemGr.getValue('impact') || 2);
+            changeGr.priority = this.calculatePriority(urgency, impact);
+            
+            // Set type - default to infrastructure if not specified
+            changeGr.type = (params && params.type) ? params.type : 'Infrastructure';
+            
+            // Set assignment group based on type
+            if (changeGr.getValue('type') === 'Infrastructure') {
+                changeGr.assignment_group = this.findGroupByName('Change Management - Infrastructure');
+            } else {
+                changeGr.assignment_group = this.findGroupByName('Change Management - Application');
+            }
+            
+            // Set planned start and end dates if provided
+            if (params && params.start_date) {
+                changeGr.setValue('start_date', params.start_date);
+            } else {
+                // Default: start 7 days from now
+                var gdt = new GlideDateTime();
+                gdt.addDays(7);
+                changeGr.setValue('start_date', gdt);
+            }
+            
+            if (params && params.end_date) {
+                changeGr.setValue('end_date', params.end_date);
+            } else {
+                var gdtEnd = new GlideDateTime();
+                gdtEnd.addDays(8);
+                changeGr.setValue('end_date', gdtEnd);
+            }
+            
+            // Link to source problem
+            changeGr.setValue('u_source_problem', problemGr.getUniqueValue());
+            
+            // Set CAB if high priority
+            if (changeGr.getValue('priority') <= 2) {
+                this.setCABForChange(changeGr);
+            }
+            
+            var changeSysId = changeGr.insert();
+
+            if (changeSysId) {
+                // Link problem to change
+                this.linkProblemToChange(problemGr.getUniqueValue(), changeSysId);
+                
+                // If infrastructure, trigger specific flow actions
+                if (this.isInfrastructureChange(changeGr)) {
+                    this.onInfrastructureChangeCreated(changeGr);
+                }
+                
+                // Send notifications
+                this.sendChangeCreatedNotification(changeGr);
+
+                gs.info('ChangeUtils: Change ' + changeGr.number + 
+                         ' created from problem ' + problemGr.number);
+
+                return {
+                    success: true,
+                    number: changeGr.number,
+                    sys_id: changeSysId,
+                    message: 'Change ' + changeGr.number + ' has been created successfully.'
+                };
+            } else {
+                return {success: false, error: 'Failed to create change record'};
+            }
+        } catch (e) {
+            gs.error('ChangeUtils: Error creating change - ' + e.message);
+            return {success: false, error: e.message};
+        }
+    },
+
+    /**
+     * Calculate priority based on urgency and impact
+     * @param {number} urgency - 1-3
+     * @param {number} impact - 1-3
+     * @returns {number} priority 1-5
+     */
+    calculatePriority: function(urgency, impact) {
+        // Standard ServiceNow priority matrix
+        var matrix = {
+            '1,1': 1,
+            '1,2': 2,
+            '1,3': 3,
+            '2,1': 2,
+            '2,2': 3,
+            '2,3': 4,
+            '3,1': 3,
+            '3,2': 4,
+            '3,3': 5
+        };
+        return matrix[urgency + ',' + impact] || 3;
+    },
+
+    /**
+     * Build change description from problem
+     * @param {GlideRecord} problemGr
+     * @returns {string}
+     */
+    buildChangeDescription: function(problemGr) {
+        var description = '=== Change created from Problem ' + problemGr.number + ' ===\n\n';
+        
+        description += 'Original Problem Details:\n';
+        description += '  Short Description: ' + problemGr.getValue('short_description') + '\n';
+        description += '  Category/Subcategory: ' + problemGr.getDisplayValue('category') + 
+                       ' / ' + problemGr.getDisplayValue('subcategory') + '\n';
+        description += '  Priority (calculated from problem): ' + 
+                       problemGr.getDisplayValue('priority') + '\n\n';
+        
+        description += 'Original Problem Description:\n';
+        description += problemGr.getValue('description') + '\n\n';
+        description += '=== End of Problem Details ===\n\n';
+        description += '=== Change Implementation Plan ===\n';
+        description += '[To be filled by change implementer]\n\n';
+        description += '=== Rollback Plan ===\n';
+        description += '[To be filled by change implementer]\n';
+        
+        return description;
+    },
+
+    /**
+     * Find a group by name
+     * @param {string} name - Group name
+     * @returns {string} sys_id or empty
+     */
+    findGroupByName: function(name) {
+        var gr = new GlideRecord('sys_user_group');
+        if (gr.get('name', name)) {
+            return gr.getUniqueValue();
+        }
+        return '';
+    },
+
+    /**
+     * Set CAB approval requirement for high priority changes
+     * @param {GlideRecord} changeGr
+     */
+    setCABForChange: function(changeGr) {
+        // Set CAB required flag
+        changeGr.setValue('cab_required', true);
+        changeGr.setValue('cab_recommendation', 'Required due to high priority');
+        
+        // Set CAB approval group
+        var cabGroup = this.findGroupByName('Change Management - Infrastructure');
+        if (cabGroup) {
+            changeGr.setValue('cab_group', cabGroup);
+        }
+        
+        gs.info('ChangeUtils: CAB approval set for change due to high priority');
+    },
+
+    /**
+     * Link a problem to its change
+     * @param {string} problemSysId
+     * @param {string} changeSysId
+     */
+    linkProblemToChange: function(problemSysId, changeSysId) {
+        var problemGr = new GlideRecord('problem');
+        if (problemGr.get(problemSysId)) {
+            problemGr.setValue('u_change', changeSysId);
+            
+            var note = '\n[Change Created] Change ' + 
+                       new GlideRecord('change_request').get(changeSysId) ? 
+                       new GlideRecord('change_request').getValue('number') : '' + 
+                       ' has been created by ' + gs.getUserDisplayName() + 
+                       ' to implement the resolution.';
+            problemGr.work_notes = note;
+            problemGr.update();
+        }
+    },
+
+    /**
+     * Actions to perform when an Infrastructure change is created
+     * @param {GlideRecord} changeGr
+     */
+    onInfrastructureChangeCreated: function(changeGr) {
+        // Set the state to 'Assess' (2) for infrastructure changes
+        changeGr.state = 2; // Assess
+        changeGr.update();
+        
+        gs.info('ChangeUtils: Infrastructure change ' + changeGr.number + 
+                 ' moved to Assess state');
+    },
+
+    /**
+     * Auto-create change tasks when infrastructure change moves to Schedule state
+     * @param {GlideRecord} changeGr - The change request
+     * @returns {boolean}
+     */
+    autoCreateChangeTasks: function(changeGr) {
+        if (!this.isInfrastructureChange(changeGr)) {
+            return false;
+        }
+
+        try {
+            // Task 1: Pre-implementation Environment Check
+            var task1 = new GlideRecord('change_task');
+            task1.initialize();
+            task1.change_request = changeGr.getUniqueValue();
+            task1.short_description = 'Pre-implementation Environment Check';
+            task1.description = 'Verify that the production environment is ready for the change.\n\n' +
+                                'Checklist:\n' +
+                                '1. Verify system backups are current\n' +
+                                '2. Check resource availability (CPU, Memory, Disk)\n' +
+                                '3. Verify network connectivity\n' +
+                                '4. Confirm all prerequisites are met\n' +
+                                '5. Notify stakeholders about the upcoming change';
+            task1.assignment_group = changeGr.getValue('assignment_group');
+            task1.state = 1; // Open
+            task1.priority = changeGr.getValue('priority');
+            var task1Id = task1.insert();
+
+            // Task 2: Post-implementation Verification
+            var task2 = new GlideRecord('change_task');
+            task2.initialize();
+            task2.change_request = changeGr.getUniqueValue();
+            task2.short_description = 'Post-implementation Verification';
+            task2.description = 'Verify that the change has been implemented successfully.\n\n' +
+                                'Checklist:\n' +
+                                '1. Verify the change was applied correctly\n' +
+                                '2. Run system health checks\n' +
+                                '3. Validate functionality with test cases\n' +
+                                '4. Check for any error logs\n' +
+                                '5. Confirm with stakeholders that the change is successful\n' +
+                                '6. Document any issues encountered';
+            task2.assignment_group = changeGr.getValue('assignment_group');
+            task2.state = 1; // Open
+            task2.priority = changeGr.getValue('priority');
+            var task2Id = task2.insert();
+
+            gs.info('ChangeUtils: Auto-created 2 change tasks for ' + changeGr.number +
+                     ' (Pre-check: ' + (task1Id ? 'ok' : 'fail') + 
+                     ', Post-check: ' + (task2Id ? 'ok' : 'fail') + ')');
+
+            // Add work note about created tasks
+            changeGr.work_notes = 'Auto-created 2 change tasks for infrastructure change:\n' +
+                                  '- Pre-implementation Environment Check\n' +
+                                  '- Post-implementation Verification';
+
+            return true;
+        } catch (e) {
+            gs.error('ChangeUtils: Error creating change tasks - ' + e.message);
+            return false;
+        }
+    },
+
+    /**
+     * Send notification when change is created
+     * @param {GlideRecord} changeGr
+     */
+    sendChangeCreatedNotification: function(changeGr) {
+        try {
+            changeGr.setEvent('change.created', changeGr.getUniqueValue(),
+                'Change ' + changeGr.number + ' has been created');
+            gs.info('ChangeUtils: Notification sent for change ' + changeGr.number);
+        } catch (e) {
+            gs.error('ChangeUtils: Error sending notification - ' + e.message);
+        }
+    },
+
+    /**
+     * Send notification when change state changes
+     * @param {GlideRecord} changeGr
+     * @param {string} previousState
+     */
+    sendChangeStateChangeNotification: function(changeGr, previousState) {
+        try {
+            var currentState = changeGr.getValue('state');
+            if (currentState !== previousState) {
+                changeGr.setEvent('change.state_changed', changeGr.getUniqueValue(),
+                    'Change ' + changeGr.number + ' state changed');
+                gs.info('ChangeUtils: State change notification sent for ' + changeGr.number);
+            }
+        } catch (e) {
+            gs.error('ChangeUtils: Error sending state change notification - ' + e.message);
+        }
+    },
+
+    /**
+     * Get available change states
+     * @returns {Object}
+     */
+    getChangeStates: function() {
+        return {
+            '1': 'New',
+            '2': 'Assess',
+            '3': 'Authorize',
+            '4': 'Scheduled',
+            '5': 'Implement',
+            '6': 'Review',
+            '7': 'Closed',
+            '-1': 'Cancelled'
+        };
+    },
+
+    type: 'ChangeUtils'
+};

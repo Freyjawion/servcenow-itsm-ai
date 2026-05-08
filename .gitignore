@@ -9,15 +9,19 @@ Thumbs.db
 .vscode/
 .idea/
 
+# OS files
+.DS_Store
+Thumbs.db
+*.bak
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
 # Temp scripts
 fix_xmls.ps1
-
-# Studio-incompatible formats
-Business Rules/
-Script Includes/
-update-sets/
-Reports/
-Service Portal/
 
 # Misc
 *.csv

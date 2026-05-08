@@ -1,0 +1,730 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ============================================================
+  ITSM DEMO - Update Set 3: Service Portal & Reports
+  ============================================================
+  Contents:
+   1.  Update Set header
+   2.  Service Portal Widgets (sp_widget)
+       - Incident Creator (for end users to submit incidents)
+       - My Group Incidents (for L1 agents to see their incidents)
+       - Incident to Problem (L2 escalation to Problem)
+       - Problem to Change (L2/L3 escalation to Change)
+       - Knowledge Article Browser (KB browsing)
+   3.  Dashboard & Reports (pa_dashboard, pa_report + sys_report)
+  ============================================================
+  Import: Navigate > System Update Sets > Retrieved Update Sets
+          > Import Update Set from XML > Select this file
+          > Preview > Commit
+  NOTE: After commit, manually add widgets to a Service Portal page:
+          Service Portal > Designer > Select a page > Add Widget
+  ============================================================
+-->
+<unload>
+  <!-- ========================================================== -->
+  <!-- Update Set Header                                           -->
+  <!-- ========================================================== -->
+  <sys_remote_update_set action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e001</sys_id>
+    <name>ITSM Demo - Portal Widgets &amp; Reports</name>
+    <description>Service Portal Widgets (Incident Creator, My Group Incidents, KB Browser) and ITSM Demo Dashboard. Part 3 of 3.</description>
+    <release_date/>
+    <state>loaded</state>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <application>a82d9e0cc3f88310feff9d777d01318a</application>
+  </sys_remote_update_set>
+
+  <!-- ========================================================== -->
+  <!-- WIDGET: Incident Creator                                    -->
+  <!-- ========================================================== -->
+  <sp_widget action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e010</sys_id>
+    <name>incident-creator</name>
+    <title>Report an Incident</title>
+    <type>widget</type>
+    <roles/>
+    <description>Service Portal widget for end users to submit new incidents with category and description.</description>
+    <css><![CDATA[
+.incident-creator { max-width: 700px; margin: 0 auto; }
+.incident-creator .panel-heading { background: #2a6bb6; color: white; font-size: 18px; font-weight: bold; }
+.incident-creator .form-group { margin-bottom: 18px; }
+.incident-creator label { font-weight: 600; color: #555; margin-bottom: 5px; }
+.incident-creator .required::after { content: ' *'; color: #d9534f; }
+.incident-creator textarea { resize: vertical; min-height: 100px; }
+.incident-creator .btn-primary { background: #2a6bb6; border: none; padding: 10px 30px; font-size: 16px; }
+.incident-creator .alert { border-radius: 4px; }
+.incident-creator .incident-number { font-size: 18px; font-weight: bold; color: #2a6bb6; }
+    ]]></css>
+    <client_script><![CDATA[
+function($scope, spUtil, $timeout) {
+    var c = this;
+    c.data.category = '';
+    c.data.subcategory = '';
+    c.data.short_description = '';
+    c.data.description = '';
+    c.data.urgency = '2';
+    c.submitted = false;
+    c.error = false;
+    c.errorMessage = '';
+
+    // Category options from server
+    c.categoryOptions = [];
+
+    // Subcategory mapping
+    c.subcategoryOptions = [];
+    c.subcategoryMap = {
+        'Hardware': ['Laptop', 'Desktop', 'Printer', 'Server', 'Monitor', 'Keyboard', 'Mouse'],
+        'Software': ['OS', 'Office', 'ERP', 'CRM', 'Email'],
+        'Network': ['Router', 'Switch', 'Firewall', 'VPN', 'WiFi'],
+        'Others': ['General', 'Account', 'Inquiry', 'Password']
+    };
+
+    // Watch category change
+    $scope.$watch(function() { return c.data.category; }, function(newVal) {
+        c.data.subcategory = '';
+        c.subcategoryOptions = c.subcategoryMap[newVal] || [];
+    });
+
+    $scope.submitIncident = function(form) {
+        if (!form || form.$invalid) return;
+        c.server.get({ action: 'create', 
+            category: c.data.category,
+            subcategory: c.data.subcategory,
+            short_description: c.data.short_description,
+            description: c.data.description,
+            urgency: c.data.urgency
+        }).then(function(r) {
+            if (r.data.success) {
+                c.submitted = true;
+                c.data.incident_number = r.data.number;
+                c.data.incident_sys_id = r.data.sys_id;
+            } else {
+                c.error = true;
+                c.errorMessage = r.data.error || 'Failed to create incident';
+            }
+        });
+    };
+
+    $scope.resetForm = function(form) {
+        c.data.category = '';
+        c.data.subcategory = '';
+        c.data.short_description = '';
+        c.data.description = '';
+        c.data.urgency = '2';
+        c.submitted = false;
+        c.error = false;
+        if (form) { form.$setPristine(); form.$setUntouched(); }
+    };
+}
+    ]]></client_script>
+    <server_script><![CDATA[
+(function(params) {
+    var options = {};
+
+    if (params && params.action === 'create') {
+        var gr = new GlideRecord('incident');
+        gr.initialize();
+        gr.short_description = params.short_description || 'No description';
+        gr.description = params.description || '';
+        gr.category = params.category || 'Others';
+        gr.subcategory = params.subcategory || '';
+        gr.urgency = params.urgency || '2';
+        gr.impact = params.urgency || '2';
+        gr.contact_type = 'self-service';
+        gr.caller_id = gs.getUserID();
+        var sysId = gr.insert();
+        if (sysId) {
+            options.success = true;
+            options.number = gr.number;
+            options.sys_id = sysId;
+        } else {
+            options.success = false;
+            options.error = 'Failed to create incident';
+        }
+    } else {
+        options.categories = ['Hardware', 'Software', 'Network', 'Others'];
+    }
+    return options;
+})(params);
+    ]]></server_script>
+    <template><![CDATA[
+<div class="incident-creator">
+  <div class="panel panel-primary">
+    <div class="panel-heading">Report an Incident</div>
+    <div class="panel-body">
+      <div ng-if="c.submitted" class="alert alert-success">
+        <strong>Incident Created Successfully!</strong>
+        <p>Your incident number is: <span class="incident-number">{{c.data.incident_number}}</span></p>
+        <button class="btn btn-primary" ng-click="resetForm(form)">Submit Another</button>
+      </div>
+
+      <div ng-if="!c.submitted">
+        <form name="form" novalidate>
+          <div class="form-group">
+            <label class="required">Category</label>
+            <select class="form-control" ng-model="c.data.category" required>
+              <option value="">-- Select Category --</option>
+              <option ng-repeat="cat in c.data.categories" value="{{cat}}">{{cat}}</option>
+            </select>
+          </div>
+
+          <div class="form-group" ng-if="c.subcategoryOptions.length > 0">
+            <label>Subcategory</label>
+            <select class="form-control" ng-model="c.data.subcategory">
+              <option value="">-- Select Subcategory --</option>
+              <option ng-repeat="sub in c.subcategoryOptions" value="{{sub}}">{{sub}}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Short Description</label>
+            <input type="text" class="form-control" ng-model="c.data.short_description" required maxlength="160" placeholder="Brief description of the issue"/>
+          </div>
+
+          <div class="form-group">
+            <label>Detailed Description</label>
+            <textarea class="form-control" ng-model="c.data.description" placeholder="Provide more details about the issue..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Urgency</label>
+            <select class="form-control" ng-model="c.data.urgency">
+              <option value="1">High</option>
+              <option value="2" selected>Medium</option>
+              <option value="3">Low</option>
+            </select>
+          </div>
+
+          <div ng-if="c.error" class="alert alert-danger">{{c.errorMessage}}</div>
+
+          <button type="submit" class="btn btn-primary" ng-click="submitIncident(form)" ng-disabled="form.$invalid">Submit Incident</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+    ]]></template>
+  </sp_widget>
+
+  <!-- ========================================================== -->
+  <!-- WIDGET: My Group Incidents                                  -->
+  <!-- ========================================================== -->
+  <sp_widget action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e011</sys_id>
+    <name>my-group-incidents</name>
+    <title>My Group Incidents</title>
+    <type>widget</type>
+    <roles>itsm_l1_agent,itsm_l2_agent,itsm_l3_agent</roles>
+    <description>Displays incidents assigned to the current user's groups. For L1 agents who can only see their own group's incidents.</description>
+    <css><![CDATA[
+.my-group-incidents table { margin-bottom: 0; }
+.my-group-incidents .table-header { background: #f5f5f5; font-weight: bold; }
+.my-group-incidents .badge-new { background: #d9534f; }
+.my-group-incidents .badge-progress { background: #f0ad4e; }
+.my-group-incidents .badge-resolved { background: #5cb85c; }
+.my-group-incidents .loading { text-align: center; padding: 40px; color: #999; font-size: 16px; }
+.my-group-incidents .no-incidents { text-align: center; padding: 40px; color: #999; }
+    ]]></css>
+    <client_script><![CDATA[
+function($scope) {
+    var c = this;
+    c.data.incidents = [];
+    
+    $scope.refresh = function() {
+        c.server.get({ action: 'getIncidents' }).then(function(r) {
+            c.data.incidents = r.data.incidents || [];
+            c.data.groupNames = r.data.groupNames || [];
+        });
+    };
+    $scope.refresh();
+}
+    ]]></client_script>
+    <server_script><![CDATA[
+(function(params) {
+    if (params && params.action === 'getIncidents') {
+        var incidents = [];
+        var userGroups = [];
+        var grMember = new GlideRecord('sys_user_grmember');
+        grMember.addQuery('user', gs.getUserID());
+        grMember.query();
+        while (grMember.next()) userGroups.push(grMember.getValue('group'));
+
+        var groupNames = [];
+        for (var i = 0; i < userGroups.length; i++) {
+            var gGr = new GlideRecord('sys_user_group');
+            if (gGr.get(userGroups[i])) groupNames.push(gGr.getDisplayValue('name'));
+        }
+
+        var gr = new GlideRecord('incident');
+        gr.addActiveQuery();
+        if (userGroups.length > 0) gr.addQuery('assignment_group', 'IN', userGroups.join(','));
+        gr.orderByDesc('sys_created_on');
+        gr.setLimit(50);
+        gr.query();
+        while (gr.next()) {
+            incidents.push({
+                number: gr.getValue('number'),
+                sys_id: gr.getUniqueValue(),
+                short_description: gr.getValue('short_description'),
+                state: gr.getValue('state'),
+                stateDisplay: gr.getDisplayValue('state'),
+                priority: gr.getValue('priority'),
+                category: gr.getDisplayValue('category'),
+                assignment_group: gr.getDisplayValue('assignment_group'),
+                assigned_to: gr.getDisplayValue('assigned_to'),
+                caller: gr.getDisplayValue('caller_id'),
+                created_on: gr.getValue('sys_created_on'),
+                escalated: gr.getValue('escalation')
+            });
+        }
+        return { incidents: incidents, groupNames: groupNames };
+    }
+    return {};
+})(params);
+    ]]></server_script>
+    <template><![CDATA[
+<div class="my-group-incidents panel panel-primary">
+  <div class="panel-heading">
+    My Group Incidents
+    <span class="pull-right" ng-if="c.data.groupNames.length > 0">
+      Groups: <span ng-repeat="g in c.data.groupNames">{{g}}{{$last ? '' : ', '}}</span>
+    </span>
+  </div>
+  <div class="panel-body">
+    <div ng-if="c.data.incidents.length === 0" class="no-incidents">
+      <p>No active incidents assigned to your groups.</p>
+    </div>
+    <table class="table table-hover" ng-if="c.data.incidents.length > 0">
+      <thead><tr class="table-header">
+        <th>Number</th><th>Short Description</th><th>State</th><th>Priority</th><th>Category</th><th>Assigned To</th><th>Created</th>
+      </tr></thead>
+      <tbody><tr ng-repeat="inc in c.data.incidents" ng-click="window.open('incident.do?sys_id=' + inc.sys_id, '_blank')" style="cursor: pointer;">
+        <td><a href="incident.do?sys_id={{inc.sys_id}}" target="_blank">{{inc.number}}</a></td>
+        <td>{{inc.short_description}}</td>
+        <td><span class="badge" ng-class="{'badge-new': inc.state==1, 'badge-progress': inc.state==2, 'badge-resolved': inc.state>=6}">{{inc.stateDisplay}}</span></td>
+        <td>P{{inc.priority}}</td>
+        <td>{{inc.category}}</td>
+        <td>{{inc.assigned_to || 'Unassigned'}}</td>
+        <td>{{inc.created_on | date:'short'}}</td>
+      </tr></tbody>
+    </table>
+  </div>
+</div>
+    ]]></template>
+  </sp_widget>
+
+  <!-- ========================================================== -->
+  <!-- WIDGET: Knowledge Article Browser                           -->
+  <!-- ========================================================== -->
+  <sp_widget action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e012</sys_id>
+    <name>knowledge-article-browser</name>
+    <title>Knowledge Base</title>
+    <type>widget</type>
+    <roles/>
+    <description>Service Portal widget for browsing knowledge articles from both Technical and Employee KBs.</description>
+    <css><![CDATA[
+.kb-browser .panel-heading { background: #5cb85c; color: white; font-size: 18px; font-weight: bold; }
+.kb-browser .article-item { padding: 12px 0; border-bottom: 1px solid #eee; }
+.kb-browser .article-item:last-child { border-bottom: none; }
+.kb-browser .article-title { font-size: 16px; font-weight: bold; color: #2a6bb6; }
+.kb-browser .article-meta { font-size: 12px; color: #999; margin-top: 4px; }
+.kb-browser .article-category { display: inline-block; background: #f0f0f0; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-right: 5px; }
+.kb-browser .search-box { margin-bottom: 15px; }
+    ]]></css>
+    <client_script><![CDATA[
+function($scope) {
+    var c = this;
+    c.data.articles = [];
+    c.data.knowledgeBases = [];
+    c.data.selectedKb = '';
+    c.data.searchText = '';
+
+    $scope.search = function() {
+        c.server.get({ action: 'search', kb: c.data.selectedKb, search: c.data.searchText }).then(function(r) {
+            c.data.articles = r.data.articles || [];
+        });
+    };
+
+    $scope.viewArticle = function(sysId) {
+        window.open('kb_knowledge.do?sys_id=' + sysId, '_blank');
+    };
+
+    // Initial load
+    c.server.get({ action: 'init' }).then(function(r) {
+        c.data.knowledgeBases = r.data.knowledgeBases || [];
+        c.data.articles = r.data.articles || [];
+    });
+}
+    ]]></client_script>
+    <server_script><![CDATA[
+(function(params) {
+    var options = {};
+    if (params && params.action === 'init') {
+        options.knowledgeBases = [];
+        var kbGr = new GlideRecord('kb_knowledge_base');
+        kbGr.query();
+        while (kbGr.next()) {
+            options.knowledgeBases.push({
+                sys_id: kbGr.getUniqueValue(),
+                name: kbGr.getValue('name'),
+                title: kbGr.getValue('title')
+            });
+        }
+        options.articles = getArticles();
+    } else if (params && params.action === 'search') {
+        options.articles = getArticles(params.kb, params.search);
+    }
+    function getArticles(kbSysId, searchText) {
+        var articles = [];
+        var gr = new GlideRecord('kb_knowledge');
+        gr.addQuery('workflow_state', 'published');
+        if (kbSysId) gr.addQuery('kb_knowledge_base', kbSysId);
+        if (searchText) {
+            var encoded = 'short_descriptionLIKE' + searchText + '^ORtextLIKE' + searchText;
+            gr.addEncodedQuery(encoded);
+        }
+        gr.orderByDesc('sys_created_on');
+        gr.setLimit(20);
+        gr.query();
+        while (gr.next()) {
+            articles.push({
+                sys_id: gr.getUniqueValue(),
+                number: gr.getValue('number'),
+                short_description: gr.getValue('short_description'),
+                kb_name: gr.getDisplayValue('kb_knowledge_base'),
+                category: gr.getDisplayValue('kb_category'),
+                author: gr.getDisplayValue('author'),
+                created_on: gr.getValue('sys_created_on'),
+                snippet: gr.getValue('short_description')
+            });
+        }
+        return articles;
+    }
+    return options;
+})(params);
+    ]]></server_script>
+    <template><![CDATA[
+<div class="kb-browser panel panel-success">
+  <div class="panel-heading">Knowledge Base</div>
+  <div class="panel-body">
+    <div class="row search-box">
+      <div class="col-md-6">
+        <select class="form-control" ng-model="c.data.selectedKb" ng-change="search()">
+          <option value="">All Knowledge Bases</option>
+          <option ng-repeat="kb in c.data.knowledgeBases" value="{{kb.sys_id}}">{{kb.title}}</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" class="form-control" ng-model="c.data.searchText" placeholder="Search articles..." ng-keyup="$event.keyCode==13 && search()"/>
+          <span class="input-group-btn"><button class="btn btn-success" ng-click="search()">Search</button></span>
+        </div>
+      </div>
+    </div>
+    <div ng-if="c.data.articles.length === 0">
+      <p style="text-align: center; padding: 20px; color: #999;">No articles found.</p>
+    </div>
+    <div ng-repeat="article in c.data.articles" class="article-item" ng-click="viewArticle(article.sys_id)">
+      <div class="article-title">{{article.short_description}}</div>
+      <div class="article-meta">
+        <span class="article-category">{{article.kb_name}}</span>
+        <span class="article-category">{{article.category || 'Uncategorized'}}</span>
+        {{article.author}} - {{article.created_on | date:'mediumDate'}}
+      </div>
+    </div>
+  </div>
+</div>
+    ]]></template>
+  </sp_widget>
+
+  <!-- ========================================================== -->
+  <!-- DASHBOARD & REPORTS                                         -->
+  <!-- ========================================================== -->
+
+  <!-- Dashboard: ITSM Demo Dashboard -->
+  <pa_dashboards action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e020</sys_id>
+    <name>ITSM Demo Dashboard</name>
+    <description>Main ITSM Demo Dashboard showing incident metrics, problem trends, change overview, and SLA performance.</description>
+    <active>true</active>
+    <order>100</order>
+    <roles/>
+    <sys_scope>global</sys_scope>
+  </pa_dashboards>
+
+  <!-- Report 1: Incidents by Category (Bar) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e030</sys_id>
+    <name>Incidents by Category</name>
+    <type>bar</type>
+    <table>incident</table>
+    <group_by>category</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>100</order>
+    <description>Shows the distribution of incidents across different categories (Hardware, Software, Network, Others).</description>
+  </pa_report>
+
+  <!-- Report 2: Incidents by Priority (Pie) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e031</sys_id>
+    <name>Incidents by Priority</name>
+    <type>pie</type>
+    <table>incident</table>
+    <group_by>priority</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>200</order>
+    <description>Shows the breakdown of incidents by priority level.</description>
+  </pa_report>
+
+  <!-- Report 3: Incidents Over Time (Line) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e032</sys_id>
+    <name>Incidents Over Time</name>
+    <type>line</type>
+    <table>incident</table>
+    <group_by>sys_created_on</group_by>
+    <aggregate>count</aggregate>
+    <trend_by>DAY</trend_by>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>300</order>
+    <description>Shows incident creation trends over time.</description>
+  </pa_report>
+
+  <!-- Report 4: Incidents by Group (Column) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e033</sys_id>
+    <name>Incidents by Group</name>
+    <type>column</type>
+    <table>incident</table>
+    <group_by>assignment_group</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>400</order>
+    <description>Shows incident distribution across support groups.</description>
+  </pa_report>
+
+  <!-- Report 5: Open Incidents List -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e034</sys_id>
+    <name>Open Incidents List</name>
+    <type>list</type>
+    <table>incident</table>
+    <filter>stateNOT IN7^stateNOT IN6</filter>
+    <active>true</active>
+    <order>500</order>
+    <description>List of all currently open incidents.</description>
+  </pa_report>
+
+  <!-- Report 6: SLA Breaches (Bar) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e035</sys_id>
+    <name>SLA Breaches</name>
+    <type>bar</type>
+    <table>task_sla</table>
+    <group_by>sla</group_by>
+    <filter>has_breached=true</filter>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>600</order>
+    <description>Count of SLA breaches by SLA definition.</description>
+  </pa_report>
+
+  <!-- Report 7: Incidents by Category/Priority Matrix -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e036</sys_id>
+    <name>Incident Category-Priority Matrix</name>
+    <type>bar</type>
+    <table>incident</table>
+    <group_by>category</group_by>
+    <aggregate>count</aggregate>
+    <secondary_group_by>priority</secondary_group_by>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>250</order>
+    <description>Stacked bar chart showing category distribution by priority.</description>
+  </pa_report>
+
+  <!-- Report 8: Avg Resolution Time (Single Score) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e037</sys_id>
+    <name>Average Resolution Time</name>
+    <type>single_score</type>
+    <table>incident</table>
+    <aggregate>avg</aggregate>
+    <aggregate_field>calendar_duration</aggregate_field>
+    <filter>state=6^ORstate=7</filter>
+    <active>true</active>
+    <order>700</order>
+    <description>Average time to resolve incidents.</description>
+  </pa_report>
+
+  <!-- Report 9: Problems by Category (Donut) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e038</sys_id>
+    <name>Problems by Category</name>
+    <type>pie</type>
+    <table>problem</table>
+    <group_by>category</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>800</order>
+    <description>Distribution of problems across categories.</description>
+  </pa_report>
+
+  <!-- Report 10: Problems by State (Stacked Bar) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e039</sys_id>
+    <name>Problems by State</name>
+    <type>bar</type>
+    <table>problem</table>
+    <group_by>state</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>900</order>
+    <description>Shows the current state distribution of problems.</description>
+  </pa_report>
+
+  <!-- Report 11: Changes by Type (Pie) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e040</sys_id>
+    <name>Changes by Type</name>
+    <type>pie</type>
+    <table>change_request</table>
+    <group_by>type</group_by>
+    <aggregate>count</aggregate>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>1000</order>
+    <description>Breakdown of change requests by type.</description>
+  </pa_report>
+
+  <!-- Report 12: Changes Over Time (Line) -->
+  <pa_report action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e041</sys_id>
+    <name>Changes Over Time</name>
+    <type>line</type>
+    <table>change_request</table>
+    <group_by>sys_created_on</group_by>
+    <aggregate>count</aggregate>
+    <trend_by>DAY</trend_by>
+    <show_aggregate_label>true</show_aggregate_label>
+    <active>true</active>
+    <order>1100</order>
+    <description>Shows change request creation trends over time.</description>
+  </pa_report>
+
+  <!-- ========================================================== -->
+  <!-- Dashboard Panel (associating reports to dashboard)          -->
+  <!-- ========================================================== -->
+  
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e050</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e030</report>
+    <order>100</order>
+    <width>3md</width>
+    <height>1</height>
+    <x>0</x>
+    <y>0</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e051</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e031</report>
+    <order>200</order>
+    <width>3md</width>
+    <height>1</height>
+    <x>3</x>
+    <y>0</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e052</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e032</report>
+    <order>300</order>
+    <width>6md</width>
+    <height>1</height>
+    <x>6</x>
+    <y>0</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e053</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e033</report>
+    <order>400</order>
+    <width>4md</width>
+    <height>1</height>
+    <x>0</x>
+    <y>1</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e054</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e036</report>
+    <order>500</order>
+    <width>4md</width>
+    <height>1</height>
+    <x>4</x>
+    <y>1</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e055</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e035</report>
+    <order>600</order>
+    <width>4md</width>
+    <height>1</height>
+    <x>8</x>
+    <y>1</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e056</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e034</report>
+    <order>700</order>
+    <width>6md</width>
+    <height>1</height>
+    <x>0</x>
+    <y>2</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e057</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e038</report>
+    <order>800</order>
+    <width>3md</width>
+    <height>1</height>
+    <x>6</x>
+    <y>2</y>
+  </pa_dashboards_panel>
+
+  <pa_dashboards_panel action="INSERT_OR_UPDATE">
+    <sys_id>a82d0000000000000000000000e058</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e040</report>
+    <order>900</order>
+    <width>3md</width>
+    <height>1</height>
+    <x>9</x>
+    <y>2</y>
+  </pa_dashboards_panel>
+
+</unload>

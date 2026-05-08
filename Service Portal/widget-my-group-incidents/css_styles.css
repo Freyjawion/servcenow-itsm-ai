@@ -1,0 +1,280 @@
+/* 
+ * My Group Incidents Widget Styles
+ */
+
+#my-group-incidents {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header */
+.mgi-header {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mgi-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 300;
+}
+
+.mgi-header h2 .glyphicon {
+  margin-right: 8px;
+}
+
+.mgi-header p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Summary Cards */
+.mgi-summary {
+  margin-bottom: 25px;
+}
+
+.mgi-card {
+  background: white;
+  border-radius: 8px;
+  padding: 18px 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 15px;
+  border-left: 4px solid #ccc;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mgi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.mgi-card-total { border-left-color: #3498db; }
+.mgi-card-new { border-left-color: #e74c3c; }
+.mgi-card-progress { border-left-color: #f39c12; }
+.mgi-card-hold { border-left-color: #95a5a6; }
+
+.mgi-card-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.mgi-card-label {
+  font-size: 12px;
+  color: #7f8c8d;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Incident List */
+.mgi-list .panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  margin-bottom: 12px;
+  transition: box-shadow 0.2s ease;
+}
+
+.mgi-list .panel:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.mgi-list .panel-heading {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 15px;
+}
+
+.mgi-list .panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.mgi-list .panel-title a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.mgi-list .panel-title a:hover {
+  text-decoration: underline;
+  color: #2980b9;
+}
+
+.mgi-state-label {
+  margin-left: 8px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+.mgi-list .panel-body {
+  padding: 12px 15px;
+}
+
+.mgi-description {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.mgi-detail {
+  margin: 0;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.mgi-detail .glyphicon {
+  margin-right: 3px;
+  font-size: 11px;
+}
+
+.mgi-detail .separator {
+  margin: 0 8px;
+  color: #ddd;
+}
+
+/* Urgency Badges */
+.mgi-urgency {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mgi-urgent-high {
+  background: #fce4ec;
+  color: #c0392b;
+  border: 1px solid #f8d7da;
+}
+
+.mgi-urgent-medium {
+  background: #fff8e1;
+  color: #f39c12;
+  border: 1px solid #ffeeba;
+}
+
+.mgi-urgent-low {
+  background: #e8f5e9;
+  color: #27ae60;
+  border: 1px solid #c3e6cb;
+}
+
+.mgi-group-name {
+  font-size: 11px;
+  color: #95a5a6;
+  margin-top: 4px;
+}
+
+.mgi-group-name .glyphicon {
+  margin-right: 3px;
+}
+
+/* Action Buttons */
+.mgi-actions {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.mgi-actions .btn {
+  margin-right: 6px;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.mgi-actions .btn-primary {
+  background: #3498db;
+  border-color: #3498db;
+}
+
+.mgi-actions .btn-primary:hover {
+  background: #2980b9;
+}
+
+.mgi-actions .btn-success {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+
+.mgi-actions .btn-success:hover {
+  background: #219a52;
+}
+
+.mgi-actions .btn-warning {
+  background: #f39c12;
+  border-color: #f39c12;
+  color: white;
+}
+
+.mgi-actions .btn-warning:hover {
+  background: #e67e22;
+}
+
+/* Refresh Button */
+.mgi-refresh {
+  margin: 25px 0;
+}
+
+.mgi-refresh .btn {
+  padding: 8px 30px;
+  border-radius: 4px;
+  color: #555;
+}
+
+.mgi-refresh .btn:hover {
+  background: #f0f0f0;
+}
+
+/* Loading & States */
+.mgi-loading .spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #27ae60;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mgi-empty .alert-info {
+  border: 1px solid #bee5eb;
+  background: #d1ecf1;
+  color: #0c5460;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+.mgi-error .alert-danger {
+  border: 1px solid #f5c6cb;
+  background: #f8d7da;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #my-group-incidents { padding: 10px; }
+  .mgi-card { margin-bottom: 10px; }
+  .mgi-card-number { font-size: 26px; }
+}

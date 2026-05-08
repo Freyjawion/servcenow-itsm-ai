@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <sp_widget action="INSERT_OR_UPDATE">
+    <sys_id>itsm_widget_incident_creator</sys_id>
+    <name>ITSM Incident Creator</name>
+    <id>itsm-incident-creator-widget</id>
+    <description>Allows users to submit incidents through the Service Portal with category/subcategory selection and automatic L1 group assignment.</description>
+    
+    <template><![CDATA[
+<div id="itsm-incident-creator">
+  <div class="itsm-header">
+    <h1><span class="glyphicon glyphicon-wrench"></span> IT Service Desk</h1>
+    <p>Submit an incident ticket to our support team</p>
+  </div>
+
+  <div class="itsm-success" ng-show="c.successMessage">
+    <div class="alert alert-success" role="alert">
+      <span class="glyphicon glyphicon-ok-sign"></span>
+      <strong>Incident Submitted Successfully!</strong>
+      <p>{{c.successMessage}}</p>
+      <button class="btn btn-primary" ng-click="c.resetForm()">
+        <span class="glyphicon glyphicon-plus"></span> Submit Another Incident
+      </button>
+    </div>
+  </div>
+
+  <div class="itsm-error" ng-show="c.errorMessage">
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign"></span>
+      <strong>Error:</strong> {{c.errorMessage}}
+    </div>
+  </div>
+
+  <form name="incidentForm" class="itsm-form" ng-show="!c.successMessage" novalidate>
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="glyphicon glyphicon-user"></span> Caller Information</h3>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="callerName">Your Name <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="callerName" 
+                 ng-model="c.data.caller_name" placeholder="Enter your full name" required readonly ng-disabled="true">
+          <small class="text-muted">Auto-filled from your profile</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="glyphicon glyphicon-file"></span> Incident Details</h3>
+      </div>
+      <div class="panel-body">
+        
+        <div class="form-group">
+          <label for="shortDescription">Short Description <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="shortDescription" 
+                 ng-model="c.data.short_description" placeholder="Brief summary of the issue (e.g., Laptop not turning on)" required maxlength="160">
+          <small class="text-muted">Max 160 characters</small>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category <span class="text-danger">*</span></label>
+          <select class="form-control" id="category" 
+                  ng-model="c.data.category" ng-change="c.onCategoryChange()" required>
+            <option value="" disabled selected>-- Select Category --</option>
+            <option ng-repeat="cat in c.data.categories" value="{{cat}}">{{cat}}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="subcategory">Subcategory <span class="text-danger">*</span></label>
+          <select class="form-control" id="subcategory" 
+                  ng-model="c.data.subcategory" ng-disabled="!c.data.category" required>
+            <option value="" disabled selected>
+              {{c.data.category ? '-- Select Subcategory --' : '-- Select a Category first --'}}
+            </option>
+            <option ng-repeat="sub in c.data.subcategories" value="{{sub}}">{{sub}}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="description" 
+                    ng-model="c.data.description" rows="6" 
+                    placeholder="Please provide detailed information about the issue, including:&#10;• What happened?&#10;• When did it happen?&#10;• What have you tried so far?&#10;• Any error messages?" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="urgency">Urgency</label>
+          <select class="form-control" id="urgency" ng-model="c.data.urgency">
+            <option value="3">3 - Low</option>
+            <option value="2" selected>2 - Medium</option>
+            <option value="1">1 - High</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="itsm-actions">
+      <button type="submit" class="btn btn-primary btn-lg" 
+              ng-click="c.submitIncident()" 
+              ng-disabled="c.isSubmitting || incidentForm.$invalid">
+        <span class="glyphicon glyphicon-send"></span> 
+        {{c.isSubmitting ? 'Submitting...' : 'Submit Incident'}}
+      </button>
+      <button type="button" class="btn btn-default btn-lg" ng-click="c.resetForm()">
+        <span class="glyphicon glyphicon-refresh"></span> Reset
+      </button>
+    </div>
+
+  </form>
+
+  <div class="itsm-loading" ng-show="c.isLoading">
+    <div class="text-center" style="padding: 50px;">
+      <span class="spinner spinner-lg"></span>
+      <p>Loading...</p>
+    </div>
+  </div>
+</div>
+    ]]></template>
+    
+    <client_script><![CDATA[
+function ITSMIncidentCreator($scope, spUtil) {
+    var c = this;
+    c.isSubmitting = false;
+    c.successMessage = null;
+    c.errorMessage = null;
+    c.isLoading = false;
+
+    c.onCategoryChange = function() {
+        c.data.subcategories = [];
+        c.data.subcategory = '';
+        if (c.data.category) {
+            c.server.get({action: 'getSubcategories', category: c.data.category})
+                .then(function(response) {
+                    if (response.data && response.data.subcategories) {
+                        c.data.subcategories = response.data.subcategories;
+                    }
+                });
+        }
+    };
+
+    c.submitIncident = function() {
+        if (!c.data.short_description || !c.data.category || !c.data.subcategory || !c.data.description) {
+            c.errorMessage = 'Please fill in all required fields.';
+            return;
+        }
+        c.isSubmitting = true;
+        c.errorMessage = null;
+        c.server.get({
+            action: 'createIncident',
+            short_description: c.data.short_description,
+            category: c.data.category,
+            subcategory: c.data.subcategory,
+            description: c.data.description,
+            urgency: c.data.urgency
+        }).then(function(response) {
+            c.isSubmitting = false;
+            if (response.data && response.data.success) {
+                c.successMessage = response.data.message;
+                spUtil.publish('incident.created', {incidentNumber: response.data.number});
+            } else {
+                c.errorMessage = response.data.error || 'Failed to create incident. Please try again.';
+            }
+        }, function(error) {
+            c.isSubmitting = false;
+            c.errorMessage = 'An unexpected error occurred. Please try again.';
+        });
+    };
+
+    c.resetForm = function() {
+        c.data.short_description = '';
+        c.data.category = '';
+        c.data.subcategory = '';
+        c.data.subcategories = [];
+        c.data.description = '';
+        c.data.urgency = '2';
+        c.successMessage = null;
+        c.errorMessage = null;
+        c.isSubmitting = false;
+        if ($scope.incidentForm) {
+            $scope.incidentForm.$setPristine();
+            $scope.incidentForm.$setUntouched();
+        }
+    };
+}
+    ]]></client_script>
+    
+    <css><![CDATA[
+#itsm-incident-creator {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+.itsm-header {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+.itsm-header h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 300; }
+.itsm-header h1 .glyphicon { margin-right: 10px; font-size: 24px; }
+.itsm-header p { margin: 0; font-size: 14px; opacity: 0.9; }
+.itsm-form .panel { border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+.itsm-form .panel-heading { background: #f8f9fa; border-bottom: 1px solid #e0e0e0; padding: 12px 15px; }
+.itsm-form .panel-title { font-size: 15px; font-weight: 600; color: #333; }
+.itsm-form .panel-title .glyphicon { margin-right: 8px; color: #3498db; }
+.itsm-form .panel-body { padding: 20px; }
+.itsm-form .form-group { margin-bottom: 18px; }
+.itsm-form label { font-weight: 600; color: #333; font-size: 13px; margin-bottom: 6px; }
+.itsm-form .form-control { border: 1px solid #ccc; border-radius: 4px; padding: 10px 12px; font-size: 14px; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+.itsm-form .form-control:focus { border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
+.itsm-form .form-control[readonly] { background: #f8f9fa; cursor: not-allowed; }
+.itsm-form textarea.form-control { resize: vertical; min-height: 120px; }
+.itsm-form select.form-control { cursor: pointer; }
+.itsm-form .text-muted { font-size: 12px; color: #6c757d; margin-top: 4px; display: block; }
+.itsm-form .text-danger { color: #dc3545; }
+.itsm-form .form-control.ng-touched.ng-invalid { border-color: #dc3545; }
+.itsm-form .form-control.ng-touched.ng-invalid:focus { box-shadow: 0 0 0 2px rgba(220,53,69,0.2); }
+.itsm-actions { text-align: center; padding: 15px 0; }
+.itsm-actions .btn { margin: 5px 10px; min-width: 180px; border-radius: 4px; font-size: 15px; padding: 12px 24px; transition: all 0.3s ease; }
+.itsm-actions .btn-primary { background: #3498db; border-color: #3498db; }
+.itsm-actions .btn-primary:hover:not(:disabled) { background: #2980b9; border-color: #2980b9; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(52,152,219,0.3); }
+.itsm-actions .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.itsm-actions .btn-default { background: #f8f9fa; border-color: #ccc; }
+.itsm-actions .btn-default:hover { background: #e9ecef; border-color: #b0b0b0; }
+.itsm-success .alert-success { text-align: center; padding: 30px; margin: 20px 0; border: 1px solid #c3e6cb; background: #d4edda; border-radius: 8px; }
+.itsm-success .alert-success .glyphicon { font-size: 36px; display: block; margin-bottom: 15px; color: #28a745; }
+.itsm-success .alert-success strong { display: block; font-size: 20px; margin-bottom: 10px; color: #155724; }
+.itsm-success .alert-success p { font-size: 14px; color: #155724; margin-bottom: 20px; white-space: pre-line; }
+.itsm-success .btn-primary { background: #28a745; border-color: #28a745; }
+.itsm-success .btn-primary:hover { background: #218838; border-color: #1e7e34; }
+.itsm-error .alert-danger { border: 1px solid #f5c6cb; background: #f8d7da; border-radius: 6px; padding: 15px; margin: 10px 0; }
+.itsm-loading .spinner { width: 40px; height: 40px; border: 3px solid #f0f0f0; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@media (max-width: 768px) {
+  #itsm-incident-creator { padding: 10px; }
+  .itsm-header { padding: 20px 15px; }
+  .itsm-header h1 { font-size: 22px; }
+  .itsm-actions .btn { width: 100%; margin: 5px 0; }
+}
+    ]]></css>
+    
+    <controller_as>c</controller_as>
+    
+    <option_schema>
+      <option name="title" displayValue="Widget Title" type="string" default_value="IT Service Desk" />
+    </option_schema>
+    
+  </sp_widget>
+</unload>

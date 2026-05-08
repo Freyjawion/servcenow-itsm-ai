@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <!-- 
+    Report: SLA Breaches by Priority (Bar Chart)
+    Type: Bar Chart
+    Table: task_sla
+    Group By: sla_type
+    Filter: has_breached = true
+    Time filter enabled: Yes
+  -->
+  <sys_reports action="INSERT_OR_UPDATE">
+    <sys_id>itsm_rpt_sla_breach_bar</sys_id>
+    <name>SLA Breaches by Type</name>
+    <title>SLA Breaches by Type</title>
+    <table>task_sla</table>
+    <type>bar</type>
+    <active>true</active>
+    <group_by>sla_type</group_by>
+    <aggregate>COUNT</aggregate>
+    <show_condition>true</show_condition>
+    <order_direction>DESC</order_direction>
+    <order_by>2</order_by>
+    <sys_created_by>admin</sys_created_by>
+    <sys_updated_by>admin</sys_updated_by>
+    <description>Bar chart showing the number of SLA breaches grouped by SLA type (Response vs Resolution). Critical for identifying whether response or resolution SLAs are being breached more frequently.</description>
+    <filter_condition>has_breached=true^stage=completed</filter_condition>
+    <roles/>
+    <time_range_select>true</time_range_select>
+    <chart_type>bar</chart_type>
+    <stacked>false</stacked>
+    <show_data_labels>true</show_data_labels>
+    <show_legend>true</show_legend>
+    <legend_position>bottom</legend_position>
+    <color_map>
+      <color sla_type="response" value="#fd7e14"/> <!-- Response - Orange -->
+      <color sla_type="resolution" value="#dc3545"/> <!-- Resolution - Red -->
+    </color_map>
+  </sys_reports>
+</unload>

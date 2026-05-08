@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unload>
+  <sp_widget action="INSERT_OR_UPDATE">
+    <sys_id>itsm_widget_knowledge_articles</sys_id>
+    <name>Knowledge Article Browser</name>
+    <id>itsm-knowledge-articles-widget</id>
+    <description>Browse knowledge articles from published KBs. Shows available KBs and articles based on user permissions. Allows text search and category filtering.</description>
+    
+    <template><![CDATA[
+<div id="knowledge-articles">
+  <div class="ka-header">
+    <h2><span class="glyphicon glyphicon-book"></span> Knowledge Base</h2>
+    <p>Search and browse knowledge articles</p>
+  </div>
+
+  <!-- Knowledge Base Selection -->
+  <div class="ka-kb-selector">
+    <div class="btn-group btn-group-justified" role="group">
+      <a class="btn btn-default" ng-repeat="kb in c.data.knowledgeBases track by kb.sys_id"
+         ng-class="{'btn-primary': c.selectedKb === kb.sys_id}"
+         ng-click="c.selectKb(kb.sys_id)"
+         style="margin: 2px; border-radius: 6px !important;">
+        <span class="glyphicon glyphicon-{{$first ? 'wrench' : 'education'}}"></span>
+        <br><small>{{kb.label}}</small>
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="ka-search" ng-if="c.selectedKb">
+    <div class="input-group">
+      <input type="text" class="form-control" ng-model="c.searchQuery" 
+             placeholder="Search articles..." 
+             ng-keyup="$event.keyCode === 13 && c.searchArticles()">
+      <span class="input-group-btn">
+        <button class="btn btn-primary" ng-click="c.searchArticles()" ng-disabled="!c.searchQuery">
+          <span class="glyphicon glyphicon-search"></span>
+        </button>
+      </span>
+    </div>
+  </div>
+
+  <!-- No Access -->
+  <div ng-if="c.selectedKb && !c.data.hasAccess" class="ka-no-access">
+    <div class="alert alert-warning text-center">
+      <span class="glyphicon glyphicon-lock" style="font-size: 28px; display: block; margin-bottom: 8px;"></span>
+      <strong>Access Restricted</strong>
+      <p>You do not have permission to view articles in this Knowledge Base.</p>
+    </div>
+  </div>
+
+  <!-- Articles List -->
+  <div ng-if="c.selectedKb && c.data.hasAccess && c.data.articles.length > 0" class="ka-articles">
+    <div class="ka-article-item" ng-repeat="article in c.data.articles track by article.sys_id"
+         ng-click="c.openArticle(article)"
+         style="cursor: pointer;">
+      <div class="ka-article-header">
+        <span class="ka-article-title">{{article.short_description}}</span>
+        <span class="label" ng-class="{'label-success': article.workflow_state === 'published', 'label-warning': article.workflow_state === 'draft', 'label-info': article.workflow_state === 'pending_approval'}">
+          {{article.state_label}}
+        </span>
+      </div>
+      <div class="ka-article-meta">
+        <span class="glyphicon glyphicon-folder-open"></span> {{article.category || 'Uncategorized'}} &nbsp;
+        <span class="glyphicon glyphicon-user"></span> {{article.author}} &nbsp;
+        <span class="glyphicon glyphicon-calendar"></span> {{article.created_on | date:'yyyy-MM-dd'}} &nbsp;
+        <span class="glyphicon glyphicon-eye-open"></span> {{article.views || 0}}
+      </div>
+      <div class="ka-article-preview">{{article.text | limitTo: 200}}{{article.text.length > 200 ? '...' : ''}}</div>
+      <hr>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div ng-if="c.selectedKb && c.data.hasAccess && c.data.articles.length === 0 && !c.loading" class="ka-empty">
+    <div class="alert alert-info text-center">
+      <span class="glyphicon glyphicon-info-sign" style="font-size: 28px; display: block; margin-bottom: 8px;"></span>
+      <strong>No Articles Found</strong>
+      <p>There are no articles in this Knowledge Base yet, or your search returned no results.</p>
+    </div>
+  </div>
+
+  <!-- Article Detail Modal -->
+  <div class="modal fade" id="articleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{c.selectedArticle.short_description}}</h4>
+        </div>
+        <div class="modal-body">
+          <div class="ka-detail-meta">
+            <span class="label label-success">{{c.selectedArticle.kb_name}}</span>
+            <span class="label" ng-class="{'label-success': c.selectedArticle.workflow_state === 'published', 'label-warning': c.selectedArticle.workflow_state === 'draft'}">
+              {{c.selectedArticle.state_label}}
+            </span>
+            <br><br>
+            <p><strong>Category:</strong> {{c.selectedArticle.category || 'Uncategorized'}}</p>
+            <p><strong>Author:</strong> {{c.selectedArticle.author}}</p>
+            <p><strong>Last Updated:</strong> {{c.selectedArticle.updated_on | date:'yyyy-MM-dd HH:mm'}}</p>
+            <p><strong>Views:</strong> {{c.selectedArticle.views || 0}}</p>
+          </div>
+          <hr>
+          <div class="ka-detail-content" style="white-space: pre-line;">{{c.selectedArticle.text}}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div ng-if="c.loading" class="text-center" style="padding: 30px;">
+    <span class="spinner spinner-lg"></span><p>Loading...</p>
+  </div>
+</div>
+    ]]></template>
+    
+    <client_script><![CDATA[
+function KnowledgeArticlesCtrl($scope, spUtil) {
+    var c = this;
+    c.selectedKb = null;
+    c.searchQuery = '';
+    c.loading = false;
+    c.selectedArticle = null;
+
+    c.selectKb = function(kbSysId) {
+        c.selectedKb = kbSysId;
+        c.loading = true;
+        c.server.get({action: 'loadArticles', kb_sys_id: kbSysId, search: c.searchQuery || ''})
+            .then(function(response) {
+                c.loading = false;
+                if (response.data) {
+                    c.data.articles = response.data.articles || [];
+                    c.data.hasAccess = response.data.hasAccess !== false;
+                }
+            }, function() { c.loading = false; });
+    };
+
+    c.searchArticles = function() {
+        if (!c.selectedKb) return;
+        c.loading = true;
+        c.server.get({action: 'loadArticles', kb_sys_id: c.selectedKb, search: c.searchQuery || ''})
+            .then(function(response) {
+                c.loading = false;
+                if (response.data) c.data.articles = response.data.articles || [];
+            }, function() { c.loading = false; });
+    };
+
+    c.openArticle = function(article) {
+        c.selectedArticle = article;
+        // Increment view count
+        c.server.get({action: 'recordView', article_sys_id: article.sys_id});
+        // Show modal
+        $('#' + c.options.sys_id + ' #articleModal').modal('show');
+    };
+}
+    ]]></client_script>
+    
+    <css><![CDATA[
+#knowledge-articles { max-width: 800px; margin: 0 auto; padding: 20px; font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+.ka-header { text-align: center; padding: 20px; background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); color: white; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.ka-header h2 { margin: 0 0 8px 0; font-size: 22px; font-weight: 300; }
+.ka-header p { margin: 0; font-size: 13px; opacity: 0.9; }
+.ka-kb-selector { margin-bottom: 15px; }
+.ka-kb-selector .btn { border: 1px solid #ddd; border-radius: 4px; padding: 12px 8px; white-space: normal; font-size: 12px; background: #f8f9fa; }
+.ka-kb-selector .btn-primary { background: #17a2b8; border-color: #17a2b8; color: white; }
+.ka-kb-selector .btn .glyphicon { font-size: 20px; }
+.ka-search { margin-bottom: 20px; }
+.ka-no-access { max-width: 400px; margin: 30px auto; }
+.ka-articles { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; }
+.ka-article-item { padding: 10px 0; }
+.ka-article-item:hover { background: #f0f9ff; margin: 0 -15px; padding: 10px 15px; border-radius: 6px; }
+.ka-article-item hr { margin: 10px 0; }
+.ka-article-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.ka-article-title { font-weight: 600; color: #007bff; font-size: 15px; }
+.ka-article-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+.ka-article-preview { font-size: 13px; color: #555; line-height: 1.4; }
+.ka-detail-meta { font-size: 13px; color: #555; }
+.ka-detail-content { font-size: 14px; line-height: 1.6; color: #333; }
+.spinner { width: 36px; height: 36px; border: 3px solid #f0f0f0; border-top: 3px solid #17a2b8; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    ]]></css>
+    
+    <server_script><![CDATA[
+(function() {
+    data.knowledgeBases = [];
+    data.articles = [];
+    data.hasAccess = false;
+
+    var ku = new KnowledgeUtils();
+
+    // Load available KBs
+    var kbGr = new GlideRecord('kb_knowledge_base');
+    kbGr.addQuery('is_valid', true);
+    kbGr.orderBy('order');
+    kbGr.query();
+    
+    while (kbGr.next()) {
+        var kbSysId = kbGr.getUniqueValue();
+        // Only show KBs user can access
+        if (ku.canViewKb(null, kbSysId)) {
+            data.knowledgeBases.push({
+                sys_id: kbSysId,
+                name: kbGr.getValue('name'),
+                label: kbGr.getValue('title'),
+                description: kbGr.getValue('description')
+            });
+        }
+    }
+
+    if (input && input.action) {
+        switch (input.action) {
+            case 'loadArticles':
+                var kbId = input.kb_sys_id;
+                var search = input.search || '';
+                
+                if (kbId) {
+                    // Check access
+                    data.hasAccess = ku.canViewKb(null, kbId);
+                    
+                    if (data.hasAccess) {
+                        var filters = {};
+                        if (search) filters.search = search;
+                        
+                        var articles = ku.getArticles(kbId, filters);
+                        
+                        // Reformat for display
+                        data.articles = articles.map(function(a) {
+                            return {
+                                sys_id: a.sys_id,
+                                short_description: a.short_description,
+                                text: a.text,
+                                category: a.category,
+                                workflow_state: a.workflow_state,
+                                state_label: a.state_label,
+                                author: a.author,
+                                created_on: a.created_on,
+                                updated_on: a.updated_on,
+                                views: a.views,
+                                kb_name: a.kb_name
+                            };
+                        });
+                    }
+                }
+                break;
+                
+            case 'recordView':
+                if (input.article_sys_id) {
+                    var gr = new GlideRecord('kb_knowledge');
+                    if (gr.get(input.article_sys_id)) {
+                        // Increment view counter
+                        var views = parseInt(gr.getValue('views') || 0);
+                        gr.setValue('views', views + 1);
+                        gr.setWorkflow(false); // Skip business rules
+                        gr.update();
+                    }
+                }
+                break;
+        }
+    }
+})();
+    ]]></server_script>
+    
+    <controller_as>c</controller_as>
+    <option_schema></option_schema>
+  </sp_widget>
+</unload>
