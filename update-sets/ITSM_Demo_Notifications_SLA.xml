@@ -22,14 +22,14 @@
   <!-- Update Set Header                                           -->
   <!-- ========================================================== -->
   <sys_remote_update_set action="INSERT_OR_UPDATE">
-    <sys_id>itsm_demo_update_set_notif</sys_id>
+    <sys_id>a82d0000000000000000000000d001</sys_id>
     <name>ITSM Demo - Notifications &amp; SLA</name>
     <description>SLA Definitions, Email Notifications, Inbound Email Action, Knowledge Base config, Groups. Part 2 of 3.</description>
     <release_date/>
     <state>loaded</state>
     <sys_created_by>admin</sys_created_by>
     <sys_updated_by>admin</sys_updated_by>
-    <application/>
+    <application>a82d9e0cc3f88310feff9d777d01318a</application>
   </sys_remote_update_set>
 
   <!-- ========================================================== -->
@@ -38,7 +38,7 @@
 
   <!-- Response SLA - Critical (Priority 1) - 15 minutes -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_resp_critical</sys_id>
+    <sys_id>a82d0000000000000000000000d010</sys_id>
     <name>Response SLA - Critical</name>
     <table>incident</table>
     <type>response</type>
@@ -52,7 +52,7 @@
 
   <!-- Response SLA - High (Priority 2) - 1 hour -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_resp_high</sys_id>
+    <sys_id>a82d0000000000000000000000d011</sys_id>
     <name>Response SLA - High</name>
     <table>incident</table>
     <type>response</type>
@@ -66,7 +66,7 @@
 
   <!-- Response SLA - Medium (Priority 3) - 4 hours -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_resp_medium</sys_id>
+    <sys_id>a82d0000000000000000000000d012</sys_id>
     <name>Response SLA - Medium</name>
     <table>incident</table>
     <type>response</type>
@@ -80,7 +80,7 @@
 
   <!-- Response SLA - Low (Priority 4) - 8 hours -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_resp_low</sys_id>
+    <sys_id>a82d0000000000000000000000d013</sys_id>
     <name>Response SLA - Low</name>
     <table>incident</table>
     <type>response</type>
@@ -94,7 +94,7 @@
 
   <!-- Resolution SLA - Critical (Priority 1) - 1 hour -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_reso_critical</sys_id>
+    <sys_id>a82d0000000000000000000000d014</sys_id>
     <name>Resolution SLA - Critical</name>
     <table>incident</table>
     <type>resolution</type>
@@ -108,7 +108,7 @@
 
   <!-- Resolution SLA - High (Priority 2) - 4 hours -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_reso_high</sys_id>
+    <sys_id>a82d0000000000000000000000d015</sys_id>
     <name>Resolution SLA - High</name>
     <table>incident</table>
     <type>resolution</type>
@@ -122,7 +122,7 @@
 
   <!-- Resolution SLA - Medium (Priority 3) - 24 hours -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_reso_medium</sys_id>
+    <sys_id>a82d0000000000000000000000d016</sys_id>
     <name>Resolution SLA - Medium</name>
     <table>incident</table>
     <type>resolution</type>
@@ -136,7 +136,7 @@
 
   <!-- Resolution SLA - Low (Priority 4) - 48 hours -->
   <contract_sla action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sla_reso_low</sys_id>
+    <sys_id>a82d0000000000000000000000d017</sys_id>
     <name>Resolution SLA - Low</name>
     <table>incident</table>
     <type>resolution</type>
@@ -154,7 +154,7 @@
 
   <!-- Incident Created -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_inc_created</sys_id>
+    <sys_id>a82d0000000000000000000000d020</sys_id>
     <name>Incident Created</name>
     <active>true</active>
     <table>incident</table>
@@ -184,7 +184,7 @@
 
   <!-- Incident Assigned -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_inc_assigned</sys_id>
+    <sys_id>a82d0000000000000000000000d021</sys_id>
     <name>Incident Assigned</name>
     <active>true</active>
     <table>incident</table>
@@ -212,7 +212,7 @@
 
   <!-- Incident State Changed -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_inc_state_chg</sys_id>
+    <sys_id>a82d0000000000000000000000d022</sys_id>
     <name>Incident State Changed</name>
     <active>true</active>
     <table>incident</table>
@@ -240,7 +240,7 @@
 
   <!-- Incident Escalated -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_inc_esc</sys_id>
+    <sys_id>a82d0000000000000000000000d023</sys_id>
     <name>Incident Escalated</name>
     <active>true</active>
     <table>incident</table>
@@ -267,7 +267,7 @@
 
   <!-- Problem Created -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_prob_created</sys_id>
+    <sys_id>a82d0000000000000000000000d024</sys_id>
     <name>Problem Created</name>
     <active>true</active>
     <table>problem</table>
@@ -293,7 +293,7 @@
 
   <!-- Problem State Changed -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_prob_state_chg</sys_id>
+    <sys_id>a82d0000000000000000000000d025</sys_id>
     <name>Problem State Changed</name>
     <active>true</active>
     <table>problem</table>
@@ -319,7 +319,7 @@
 
   <!-- Change Created -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_chg_created</sys_id>
+    <sys_id>a82d0000000000000000000000d026</sys_id>
     <name>Change Created</name>
     <active>true</active>
     <table>change_request</table>
@@ -347,7 +347,7 @@
 
   <!-- Change State Changed -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_chg_state_chg</sys_id>
+    <sys_id>a82d0000000000000000000000d027</sys_id>
     <name>Change State Changed</name>
     <active>true</active>
     <table>change_request</table>
@@ -373,7 +373,7 @@
 
   <!-- CAB Approval Required -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_chg_cab</sys_id>
+    <sys_id>a82d0000000000000000000000d028</sys_id>
     <name>CAB Approval Required</name>
     <active>true</active>
     <table>change_request</table>
@@ -401,7 +401,7 @@
 
   <!-- Knowledge Article Pending Approval -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_kb_approval</sys_id>
+    <sys_id>a82d0000000000000000000000d029</sys_id>
     <name>Knowledge Article Pending Approval</name>
     <active>true</active>
     <table>kb_knowledge</table>
@@ -429,7 +429,7 @@
 
   <!-- SLA 75% Warning -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_sla_75_pct</sys_id>
+    <sys_id>a82d0000000000000000000000d030</sys_id>
     <name>SLA - 75% Warning</name>
     <active>true</active>
     <table>incident</table>
@@ -457,7 +457,7 @@
 
   <!-- SLA 90% Urgent Warning -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_sla_90_pct</sys_id>
+    <sys_id>a82d0000000000000000000000d031</sys_id>
     <name>SLA - 90% Urgent Warning</name>
     <active>true</active>
     <table>incident</table>
@@ -484,7 +484,7 @@
 
   <!-- SLA Breach -->
   <sysevent_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_notif_sla_breach</sys_id>
+    <sys_id>a82d0000000000000000000000d032</sys_id>
     <name>SLA - Breach</name>
     <active>true</active>
     <table>incident</table>
@@ -515,7 +515,7 @@
   <!-- INBOUND EMAIL ACTION                                        -->
   <!-- ========================================================== -->
   <sys_inbound_email_action action="INSERT_OR_UPDATE">
-    <sys_id>itsm_inbound_email_create_inc</sys_id>
+    <sys_id>a82d0000000000000000000000d033</sys_id>
     <name>Create Incident from Email</name>
     <active>true</active>
     <table>incident</table>
@@ -548,7 +548,7 @@
 
   <!-- Knowledge Base 1: Technical Knowledge Base -->
   <kb_knowledge_base action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_technical</sys_id>
+    <sys_id>a82d0000000000000000000000d034</sys_id>
     <name>Technical Knowledge Base</name>
     <title>Technical Knowledge Base</title>
     <description>Technical knowledge base for internal support teams. Access restricted to technical support staff (L1, L2, L3). Articles require approval before publishing.</description>
@@ -559,7 +559,7 @@
 
   <!-- Knowledge Base 2: Employee Knowledge Base -->
   <kb_knowledge_base action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_employee</sys_id>
+    <sys_id>a82d0000000000000000000000d035</sys_id>
     <name>Employee Knowledge Base</name>
     <title>Employee Knowledge Base</title>
     <description>Employee knowledge base available to all staff. Contains FAQs, how-to guides, company policies. Articles are auto-published.</description>
@@ -570,49 +570,49 @@
 
   <!-- KB Category: Technical - Hardware -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_tech_hw</sys_id>
+    <sys_id>a82d0000000000000000000000d040</sys_id>
     <label>Hardware Troubleshooting</label>
-    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d034</kb_knowledge_base>
     <order>100</order>
   </kb_category>
 
   <!-- KB Category: Technical - Software -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_tech_sw</sys_id>
+    <sys_id>a82d0000000000000000000000d041</sys_id>
     <label>Software Troubleshooting</label>
-    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d034</kb_knowledge_base>
     <order>200</order>
   </kb_category>
 
   <!-- KB Category: Technical - Network -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_tech_nw</sys_id>
+    <sys_id>a82d0000000000000000000000d042</sys_id>
     <label>Network Troubleshooting</label>
-    <kb_knowledge_base>itsm_kb_technical</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d034</kb_knowledge_base>
     <order>300</order>
   </kb_category>
 
   <!-- KB Category: Employee - General -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_emp_gen</sys_id>
+    <sys_id>a82d0000000000000000000000d043</sys_id>
     <label>General Information</label>
-    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d035</kb_knowledge_base>
     <order>100</order>
   </kb_category>
 
   <!-- KB Category: Employee - FAQ -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_emp_faq</sys_id>
+    <sys_id>a82d0000000000000000000000d044</sys_id>
     <label>Frequently Asked Questions</label>
-    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d035</kb_knowledge_base>
     <order>200</order>
   </kb_category>
 
   <!-- KB Category: Employee - Policy -->
   <kb_category action="INSERT_OR_UPDATE">
-    <sys_id>itsm_kb_cat_emp_pol</sys_id>
+    <sys_id>a82d0000000000000000000000d045</sys_id>
     <label>Company Policies</label>
-    <kb_knowledge_base>itsm_kb_employee</kb_knowledge_base>
+    <kb_knowledge_base>a82d0000000000000000000000d035</kb_knowledge_base>
     <order>300</order>
   </kb_category>
 
@@ -621,7 +621,7 @@
   <!-- ========================================================== -->
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_hw</sys_id>
+    <sys_id>a82d0000000000000000000000d050</sys_id>
     <name>Hardware Support</name>
     <type>itsm_l1_group</type>
     <description>L1 - Hardware Incident Support</description>
@@ -631,7 +631,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_sw</sys_id>
+    <sys_id>a82d0000000000000000000000d051</sys_id>
     <name>Software Support</name>
     <type>itsm_l1_group</type>
     <description>L1 - Software Incident Support</description>
@@ -639,7 +639,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_nw</sys_id>
+    <sys_id>a82d0000000000000000000000d052</sys_id>
     <name>Network Support</name>
     <type>itsm_l1_group</type>
     <description>L1 - Network Incident Support</description>
@@ -647,7 +647,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_oth</sys_id>
+    <sys_id>a82d0000000000000000000000d053</sys_id>
     <name>Others Support</name>
     <type>itsm_l1_group</type>
     <description>L1 - Other Category Incident Support</description>
@@ -655,7 +655,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_l2</sys_id>
+    <sys_id>a82d0000000000000000000000d054</sys_id>
     <name>L2 Support Team</name>
     <type>itsm_l2_group</type>
     <description>L2 - Escalated Incident Support</description>
@@ -663,7 +663,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_chg_infra</sys_id>
+    <sys_id>a82d0000000000000000000000d055</sys_id>
     <name>Change Management - Infrastructure</name>
     <type>itsm_l3_group</type>
     <description>L3 - Infrastructure Change Management</description>
@@ -671,7 +671,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_chg_app</sys_id>
+    <sys_id>a82d0000000000000000000000d056</sys_id>
     <name>Change Management - Application</name>
     <type>itsm_l3_group</type>
     <description>L3 - Application Change Management</description>
@@ -679,7 +679,7 @@
   </sys_user_group>
 
   <sys_user_group action="INSERT_OR_UPDATE">
-    <sys_id>itsm_grp_chg_sec</sys_id>
+    <sys_id>a82d0000000000000000000000d057</sys_id>
     <name>Change Management - Security</name>
     <type>itsm_l3_group</type>
     <description>L3 - Security Change Management</description>

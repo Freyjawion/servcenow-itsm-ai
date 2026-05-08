@@ -20,21 +20,21 @@
   <!-- Update Set Header                                           -->
   <!-- ========================================================== -->
   <sys_remote_update_set action="INSERT_OR_UPDATE">
-    <sys_id>itsm_demo_update_set_core</sys_id>
+    <sys_id>a82d0000000000000000000000c001</sys_id>
     <name>ITSM Demo - Core Configuration</name>
     <description>Core configuration for ITSM Demo: Script Includes, Business Rules, ACLs, Scheduled Jobs. Part 1 of 3.</description>
     <release_date/>
     <state>loaded</state>
     <sys_created_by>admin</sys_created_by>
     <sys_updated_by>admin</sys_updated_by>
-    <application/>
+    <application>a82d9e0cc3f88310feff9d777d01318a</application>
   </sys_remote_update_set>
 
   <!-- ========================================================== -->
   <!-- SCRIPT INCLUDE: ITSMGroupAssignment                        -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_group_assign</sys_id>
+    <sys_id>a82d0000000000000000000000c010</sys_id>
     <name>ITSMGroupAssignment</name>
     <access>public</access>
     <active>true</active>
@@ -117,7 +117,7 @@ ITSMGroupAssignment.prototype = {
   <!-- SCRIPT INCLUDE: ITSMNotificationUtils                      -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_notif_utils</sys_id>
+    <sys_id>a82d0000000000000000000000c011</sys_id>
     <name>ITSMNotificationUtils</name>
     <access>public</access>
     <active>true</active>
@@ -167,7 +167,7 @@ ITSMNotificationUtils.prototype = {
   <!-- SCRIPT INCLUDE: ITSMEmailParser                             -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_email_parser</sys_id>
+    <sys_id>a82d0000000000000000000000c012</sys_id>
     <name>ITSMEmailParser</name>
     <access>public</access>
     <active>true</active>
@@ -282,7 +282,7 @@ ITSMEmailParser.prototype = {
   <!-- SCRIPT INCLUDE: ProblemUtils                                -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_problem_utils</sys_id>
+    <sys_id>a82d0000000000000000000000c013</sys_id>
     <name>ProblemUtils</name>
     <access>public</access>
     <active>true</active>
@@ -395,7 +395,7 @@ ProblemUtils.prototype = {
   <!-- SCRIPT INCLUDE: ChangeUtils                                 -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_change_utils</sys_id>
+    <sys_id>a82d0000000000000000000000c014</sys_id>
     <name>ChangeUtils</name>
     <access>public</access>
     <active>true</active>
@@ -547,7 +547,7 @@ ChangeUtils.prototype = {
   <!-- SCRIPT INCLUDE: KnowledgeUtils                              -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_knowledge_utils</sys_id>
+    <sys_id>a82d0000000000000000000000c015</sys_id>
     <name>KnowledgeUtils</name>
     <access>public</access>
     <active>true</active>
@@ -600,7 +600,7 @@ KnowledgeUtils.prototype = {
   <!-- SCRIPT INCLUDE: SLAUtils                                    -->
   <!-- ========================================================== -->
   <sys_script_include action="INSERT_OR_UPDATE">
-    <sys_id>itsm_si_sla_utils</sys_id>
+    <sys_id>a82d0000000000000000000000c016</sys_id>
     <name>SLAUtils</name>
     <access>public</access>
     <active>true</active>
@@ -749,7 +749,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Set L1 Group Assignment -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_set_l1_group</sys_id>
+    <sys_id>a82d0000000000000000000000c020</sys_id>
     <name>Set L1 Group Assignment</name>
     <active>true</active>
     <table>incident</table>
@@ -771,7 +771,7 @@ SLAUtils.prototype = {
 
   <!-- BR: L1 to L2 Escalation -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_l1_l2_esc</sys_id>
+    <sys_id>a82d0000000000000000000000c021</sys_id>
     <name>L1 to L2 Escalation</name>
     <active>true</active>
     <table>incident</table>
@@ -796,7 +796,7 @@ SLAUtils.prototype = {
 
   <!-- BR: State Change Notification Trigger -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_state_change_notif</sys_id>
+    <sys_id>a82d0000000000000000000000c022</sys_id>
     <name>State Change Notification Trigger</name>
     <active>true</active>
     <table>incident</table>
@@ -817,7 +817,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Restrict Incident Visibility -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_restrict_vis</sys_id>
+    <sys_id>a82d0000000000000000000000c023</sys_id>
     <name>Restrict Incident Visibility</name>
     <active>true</active>
     <table>incident</table>
@@ -843,7 +843,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Problem State Change Notification -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_problem_state</sys_id>
+    <sys_id>a82d0000000000000000000000c024</sys_id>
     <name>Problem State Change Notification</name>
     <active>true</active>
     <table>problem</table>
@@ -859,7 +859,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Infrastructure Change Flow -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_infra_change</sys_id>
+    <sys_id>a82d0000000000000000000000c025</sys_id>
     <name>Infrastructure Change Flow</name>
     <active>true</active>
     <table>change_request</table>
@@ -882,7 +882,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Change State Notification -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_change_state_notif</sys_id>
+    <sys_id>a82d0000000000000000000000c026</sys_id>
     <name>Change State Notification</name>
     <active>true</active>
     <table>change_request</table>
@@ -898,7 +898,7 @@ SLAUtils.prototype = {
 
   <!-- BR: KB Article Publish Approval -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_kb_approval</sys_id>
+    <sys_id>a82d0000000000000000000000c027</sys_id>
     <name>KB Article Publish Approval</name>
     <active>true</active>
     <table>kb_knowledge</table>
@@ -923,7 +923,7 @@ SLAUtils.prototype = {
 
   <!-- BR: KB Article Auto-Publish -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_kb_autopub</sys_id>
+    <sys_id>a82d0000000000000000000000c028</sys_id>
     <name>KB Article Auto-Publish</name>
     <active>true</active>
     <table>kb_knowledge</table>
@@ -943,7 +943,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Start SLA on Incident Create -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_start_sla</sys_id>
+    <sys_id>a82d0000000000000000000000c029</sys_id>
     <name>Start SLA on Incident Create</name>
     <active>true</active>
     <table>incident</table>
@@ -960,7 +960,7 @@ SLAUtils.prototype = {
 
   <!-- BR: Stop SLA on Incident Resolve/Close -->
   <sys_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_br_stop_sla</sys_id>
+    <sys_id>a82d0000000000000000000000c030</sys_id>
     <name>Stop SLA on Incident Resolve/Close</name>
     <active>true</active>
     <table>incident</table>
@@ -987,7 +987,7 @@ SLAUtils.prototype = {
 
   <!-- ACL: Incident - L1 users see only their group -->
   <sys_security_acl action="INSERT_OR_UPDATE">
-    <sys_id>itsm_acl_incident_mygroup</sys_id>
+    <sys_id>a82d0000000000000000000000c031</sys_id>
     <name>incident</name>
     <type>record</type>
     <operation>read</operation>
@@ -1014,7 +1014,7 @@ SLAUtils.prototype = {
 
   <!-- ACL: kb_knowledge - Admin full access -->
   <sys_security_acl action="INSERT_OR_UPDATE">
-    <sys_id>itsm_acl_kb_admin</sys_id>
+    <sys_id>a82d0000000000000000000000c032</sys_id>
     <name>kb_knowledge.admin.read</name>
     <type>record</type>
     <operation>read</operation>
@@ -1026,7 +1026,7 @@ SLAUtils.prototype = {
 
   <!-- ACL: kb_knowledge - Technical KB (tech roles only) -->
   <sys_security_acl action="INSERT_OR_UPDATE">
-    <sys_id>itsm_acl_kb_technical</sys_id>
+    <sys_id>a82d0000000000000000000000c033</sys_id>
     <name>kb_knowledge.technical.read</name>
     <type>record</type>
     <operation>read</operation>
@@ -1049,7 +1049,7 @@ SLAUtils.prototype = {
 
   <!-- ACL: kb_knowledge - Employee KB (all authenticated users) -->
   <sys_security_acl action="INSERT_OR_UPDATE">
-    <sys_id>itsm_acl_kb_employee</sys_id>
+    <sys_id>a82d0000000000000000000000c034</sys_id>
     <name>kb_knowledge.employee.read</name>
     <type>record</type>
     <operation>read</operation>
@@ -1074,7 +1074,7 @@ SLAUtils.prototype = {
   <!-- Scheduled Job: SLA Check &amp; Notification Processor            -->
   <!-- ========================================================== -->
   <sysauto_script action="INSERT_OR_UPDATE">
-    <sys_id>itsm_sched_sla_check</sys_id>
+    <sys_id>a82d0000000000000000000000c035</sys_id>
     <name>SLA Check &amp; Notification Processor</name>
     <active>true</active>
     <script><![CDATA[

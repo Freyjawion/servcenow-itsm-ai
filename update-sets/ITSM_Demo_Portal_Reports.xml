@@ -25,21 +25,21 @@
   <!-- Update Set Header                                           -->
   <!-- ========================================================== -->
   <sys_remote_update_set action="INSERT_OR_UPDATE">
-    <sys_id>itsm_demo_update_set_portal</sys_id>
+    <sys_id>a82d0000000000000000000000e001</sys_id>
     <name>ITSM Demo - Portal Widgets &amp; Reports</name>
     <description>Service Portal Widgets (Incident Creator, My Group Incidents, KB Browser) and ITSM Demo Dashboard. Part 3 of 3.</description>
     <release_date/>
     <state>loaded</state>
     <sys_created_by>admin</sys_created_by>
     <sys_updated_by>admin</sys_updated_by>
-    <application/>
+    <application>a82d9e0cc3f88310feff9d777d01318a</application>
   </sys_remote_update_set>
 
   <!-- ========================================================== -->
   <!-- WIDGET: Incident Creator                                    -->
   <!-- ========================================================== -->
   <sp_widget action="INSERT_OR_UPDATE">
-    <sys_id>itsm_widget_inc_creator</sys_id>
+    <sys_id>a82d0000000000000000000000e010</sys_id>
     <name>incident-creator</name>
     <title>Report an Incident</title>
     <type>widget</type>
@@ -211,7 +211,7 @@ function($scope, spUtil, $timeout) {
   <!-- WIDGET: My Group Incidents                                  -->
   <!-- ========================================================== -->
   <sp_widget action="INSERT_OR_UPDATE">
-    <sys_id>itsm_widget_my_group_inc</sys_id>
+    <sys_id>a82d0000000000000000000000e011</sys_id>
     <name>my-group-incidents</name>
     <title>My Group Incidents</title>
     <type>widget</type>
@@ -318,7 +318,7 @@ function($scope) {
   <!-- WIDGET: Knowledge Article Browser                           -->
   <!-- ========================================================== -->
   <sp_widget action="INSERT_OR_UPDATE">
-    <sys_id>itsm_widget_kb_browser</sys_id>
+    <sys_id>a82d0000000000000000000000e012</sys_id>
     <name>knowledge-article-browser</name>
     <title>Knowledge Base</title>
     <type>widget</type>
@@ -445,7 +445,7 @@ function($scope) {
 
   <!-- Dashboard: ITSM Demo Dashboard -->
   <pa_dashboards action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dashboard_main</sys_id>
+    <sys_id>a82d0000000000000000000000e020</sys_id>
     <name>ITSM Demo Dashboard</name>
     <description>Main ITSM Demo Dashboard showing incident metrics, problem trends, change overview, and SLA performance.</description>
     <active>true</active>
@@ -456,7 +456,7 @@ function($scope) {
 
   <!-- Report 1: Incidents by Category (Bar) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_inc_by_cat</sys_id>
+    <sys_id>a82d0000000000000000000000e030</sys_id>
     <name>Incidents by Category</name>
     <type>bar</type>
     <table>incident</table>
@@ -470,7 +470,7 @@ function($scope) {
 
   <!-- Report 2: Incidents by Priority (Pie) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_inc_by_pri</sys_id>
+    <sys_id>a82d0000000000000000000000e031</sys_id>
     <name>Incidents by Priority</name>
     <type>pie</type>
     <table>incident</table>
@@ -484,7 +484,7 @@ function($scope) {
 
   <!-- Report 3: Incidents Over Time (Line) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_inc_over_time</sys_id>
+    <sys_id>a82d0000000000000000000000e032</sys_id>
     <name>Incidents Over Time</name>
     <type>line</type>
     <table>incident</table>
@@ -499,7 +499,7 @@ function($scope) {
 
   <!-- Report 4: Incidents by Group (Column) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_inc_by_grp</sys_id>
+    <sys_id>a82d0000000000000000000000e033</sys_id>
     <name>Incidents by Group</name>
     <type>column</type>
     <table>incident</table>
@@ -513,7 +513,7 @@ function($scope) {
 
   <!-- Report 5: Open Incidents List -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_open_inc</sys_id>
+    <sys_id>a82d0000000000000000000000e034</sys_id>
     <name>Open Incidents List</name>
     <type>list</type>
     <table>incident</table>
@@ -525,7 +525,7 @@ function($scope) {
 
   <!-- Report 6: SLA Breaches (Bar) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_sla_breach</sys_id>
+    <sys_id>a82d0000000000000000000000e035</sys_id>
     <name>SLA Breaches</name>
     <type>bar</type>
     <table>task_sla</table>
@@ -540,7 +540,7 @@ function($scope) {
 
   <!-- Report 7: Incidents by Category/Priority Matrix -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_inc_matrix</sys_id>
+    <sys_id>a82d0000000000000000000000e036</sys_id>
     <name>Incident Category-Priority Matrix</name>
     <type>bar</type>
     <table>incident</table>
@@ -555,7 +555,7 @@ function($scope) {
 
   <!-- Report 8: Avg Resolution Time (Single Score) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_avg_resolve</sys_id>
+    <sys_id>a82d0000000000000000000000e037</sys_id>
     <name>Average Resolution Time</name>
     <type>single_score</type>
     <table>incident</table>
@@ -569,7 +569,7 @@ function($scope) {
 
   <!-- Report 9: Problems by Category (Donut) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_prob_by_cat</sys_id>
+    <sys_id>a82d0000000000000000000000e038</sys_id>
     <name>Problems by Category</name>
     <type>pie</type>
     <table>problem</table>
@@ -583,7 +583,7 @@ function($scope) {
 
   <!-- Report 10: Problems by State (Stacked Bar) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_prob_by_state</sys_id>
+    <sys_id>a82d0000000000000000000000e039</sys_id>
     <name>Problems by State</name>
     <type>bar</type>
     <table>problem</table>
@@ -597,7 +597,7 @@ function($scope) {
 
   <!-- Report 11: Changes by Type (Pie) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_chg_by_type</sys_id>
+    <sys_id>a82d0000000000000000000000e040</sys_id>
     <name>Changes by Type</name>
     <type>pie</type>
     <table>change_request</table>
@@ -611,7 +611,7 @@ function($scope) {
 
   <!-- Report 12: Changes Over Time (Line) -->
   <pa_report action="INSERT_OR_UPDATE">
-    <sys_id>itsm_report_chg_over_time</sys_id>
+    <sys_id>a82d0000000000000000000000e041</sys_id>
     <name>Changes Over Time</name>
     <type>line</type>
     <table>change_request</table>
@@ -629,9 +629,9 @@ function($scope) {
   <!-- ========================================================== -->
   
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_inc_by_cat</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_inc_by_cat</report>
+    <sys_id>a82d0000000000000000000000e050</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e030</report>
     <order>100</order>
     <width>3md</width>
     <height>1</height>
@@ -640,9 +640,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_inc_by_pri</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_inc_by_pri</report>
+    <sys_id>a82d0000000000000000000000e051</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e031</report>
     <order>200</order>
     <width>3md</width>
     <height>1</height>
@@ -651,9 +651,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_inc_over_time</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_inc_over_time</report>
+    <sys_id>a82d0000000000000000000000e052</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e032</report>
     <order>300</order>
     <width>6md</width>
     <height>1</height>
@@ -662,9 +662,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_inc_by_grp</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_inc_by_grp</report>
+    <sys_id>a82d0000000000000000000000e053</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e033</report>
     <order>400</order>
     <width>4md</width>
     <height>1</height>
@@ -673,9 +673,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_inc_matrix</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_inc_matrix</report>
+    <sys_id>a82d0000000000000000000000e054</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e036</report>
     <order>500</order>
     <width>4md</width>
     <height>1</height>
@@ -684,9 +684,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_sla_breach</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_sla_breach</report>
+    <sys_id>a82d0000000000000000000000e055</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e035</report>
     <order>600</order>
     <width>4md</width>
     <height>1</height>
@@ -695,9 +695,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_open_inc</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_open_inc</report>
+    <sys_id>a82d0000000000000000000000e056</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e034</report>
     <order>700</order>
     <width>6md</width>
     <height>1</height>
@@ -706,9 +706,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_prob_by_cat</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_prob_by_cat</report>
+    <sys_id>a82d0000000000000000000000e057</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e038</report>
     <order>800</order>
     <width>3md</width>
     <height>1</height>
@@ -717,9 +717,9 @@ function($scope) {
   </pa_dashboards_panel>
 
   <pa_dashboards_panel action="INSERT_OR_UPDATE">
-    <sys_id>itsm_dp_chg_by_type</sys_id>
-    <dashboard>itsm_dashboard_main</dashboard>
-    <report>itsm_report_chg_by_type</report>
+    <sys_id>a82d0000000000000000000000e058</sys_id>
+    <dashboard>a82d0000000000000000000000e020</dashboard>
+    <report>a82d0000000000000000000000e040</report>
     <order>900</order>
     <width>3md</width>
     <height>1</height>
