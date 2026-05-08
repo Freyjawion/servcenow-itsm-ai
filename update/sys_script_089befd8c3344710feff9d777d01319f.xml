@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>false</action_insert>
+        <action_query>false</action_query>
+        <action_update>false</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection/>
+        <condition/>
+        <description>Auto-assigns L1 group based on category</description>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>Set L1 Group Assignment</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[[/**,  * Business Rule: Set L1 Group Assignment,  * ,  * Table: incident,  * When: before | insert, update,  * Condition: current.category.changes() || current.assignment_group.nil(),  * Order: 100,  * ,  * Description:,  * Automatically assigns the appropriate L1 support group to the incident,  * based on the selected category. Runs before insert or when category changes.,  * Only assigns if assignment_group is empty (not manually set).,  */, , (function executeRule(current, previous /*null when async*/) {,     ,     // Only auto-assign if no assignment group is set yet,     if (current.assignment_group.nil()) {,         var assigner = new ITSMGroupAssignment();,         var assigned = assigner.assignL1Group(current);,         ,         if (assigned) {,             gs.info('Auto-assigned incident ' + current.number + ,                      ' to L1 group based on category: ' + current.getDisplayValue('category'));,             ,             // Send assignment notification,             var notif = new ITSMNotificationUtils();,             notif.sendAssignedNotification(current, '');,         },     }, , })(current, previous);]]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-05-08 07:47:03</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>089befd8c3344710feff9d777d01319f</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Set L1 Group Assignment</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="ITSM Demo" source="x_1906798_itsm_d_0">cbb4a79cc3f04710feff9d777d013111</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="ITSM Demo">cbb4a79cc3f04710feff9d777d013111</sys_scope>
+        <sys_update_name>sys_script_089befd8c3344710feff9d777d01319f</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-05-08 07:47:03</sys_updated_on>
+        <template/>
+        <when>before</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=089befd8c3344710feff9d777d01319f"/>
+</record_update>
