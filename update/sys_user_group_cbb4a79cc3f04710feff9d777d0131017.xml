@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <record_update table="sys_user_group">
   <sys_user_group action="INSERT_OR_UPDATE">
     <sys_id>cbb4a79cc3f04710feff9d777d0131017</sys_id>
