@@ -12,9 +12,12 @@ Thumbs.db
 # Temp scripts
 fix_xmls.ps1
 
-# Studio-incompatible formats (recreate in Studio via copy-paste)
+# Studio-incompatible formats
 Business Rules/
 Script Includes/
-
-# Backup update sets (not Studio format)
 update-sets/
+Reports/
+Service Portal/
+
+# Misc
+*.csv
